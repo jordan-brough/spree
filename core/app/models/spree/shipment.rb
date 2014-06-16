@@ -237,7 +237,7 @@ module Spree
       return 'pending' unless order.can_ship?
       return 'pending' if inventory_units.any? &:backordered?
       return 'shipped' if state == 'shipped'
-      order.paid? ? 'ready' : 'pending'
+      order.paid? || Spree::Config[:auto_capture_on_dispatch] ? 'ready' : 'pending'
     end
 
     def tracking_url
@@ -317,6 +317,42 @@ module Spree
       end
     end
 
+    def final_price_with_items
+      item_cost + final_price
+    end
+
+    def process_order_payments
+      pending_payments =  order.pending_payments
+                            .sort_by(&:uncaptured_amount).reverse
+
+      if pending_payments.empty?
+        raise Spree::Core::GatewayError, Spree.t(:no_pending_payments)
+      else
+        shipment_to_pay = final_price_with_items
+        payments_amount = 0
+
+        payments_pool = pending_payments.each_with_object([]) do |payment, pool|
+          next if payments_amount >= shipment_to_pay
+          payments_amount += payment.uncaptured_amount
+          pool << payment
+        end
+
+        payments_pool.each do |payment|
+          capturable_amount = if payment.amount >= shipment_to_pay
+                                shipment_to_pay
+                              else
+                                payment.amount
+                              end
+          cents = (capturable_amount * 100).to_i
+          payment.capture!(cents)
+          shipment_to_pay -= capturable_amount
+        end
+      end
+    rescue Spree::Core::GatewayError => e
+      errors.add(:base, e.message)
+      return !!Spree::Config[:allow_checkout_on_gateway_error]
+    end
+
     private
 
       def manifest_unstock(item)
@@ -339,6 +375,7 @@ module Spree
 
       def after_ship
         inventory_units.each &:ship!
+        process_order_payments if Spree::Config[:auto_capture_on_dispatch]
         send_shipped_email
         touch :shipped_at
         update_order_shipment_state
