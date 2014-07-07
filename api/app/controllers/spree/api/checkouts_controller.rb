@@ -2,6 +2,9 @@ module Spree
   module Api
     class CheckoutsController < Spree::Api::BaseController
       before_filter :associate_user, only: :update
+      before_filter :load_order
+      around_filter :lock_order
+      before_filter :update_order_state
 
       include Spree::Core::ControllerHelpers::Auth
       include Spree::Core::ControllerHelpers::Order
@@ -9,7 +12,6 @@ module Spree
       skip_before_filter :set_current_order
 
       def next
-        load_order(true)
         authorize! :update, @order, order_token
         @order.next!
         respond_with(@order, default_template: 'spree/api/orders/show', status: 200)
@@ -18,14 +20,12 @@ module Spree
       end
 
       def advance
-        load_order(true)
         authorize! :update, @order, order_token
         while @order.next; end
         respond_with(@order, default_template: 'spree/api/orders/show', status: 200)
       end
 
       def update
-        load_order(true)
         authorize! :update, @order, order_token
 
         if @order.update_from_params(params, permitted_checkout_attributes, request.headers.env)
@@ -56,9 +56,12 @@ module Spree
           false
         end
 
-        def load_order(lock = false)
-          @order = Spree::Order.lock(lock).find_by!(number: params[:id])
+        def load_order
+          @order = Spree::Order.find_by!(number: params[:id])
           raise_insufficient_quantity and return if @order.insufficient_stock_lines.present?
+        end
+
+        def update_order_state
           @order.state = params[:state] if params[:state]
           state_callback(:before)
         end

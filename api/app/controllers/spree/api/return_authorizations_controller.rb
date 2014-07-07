@@ -1,6 +1,7 @@
 module Spree
   module Api
     class ReturnAuthorizationsController < Spree::Api::BaseController
+      around_filter :lock_order, only: [:create, :update, :destroy, :receive, :cancel]
 
       def create
         authorize! :create, ReturnAuthorization

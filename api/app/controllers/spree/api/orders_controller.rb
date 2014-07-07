@@ -4,7 +4,8 @@ module Spree
       skip_before_filter :check_for_user_or_api_key, only: :apply_coupon_code
       skip_before_filter :authenticate_user, only: :apply_coupon_code
 
-      before_filter :find_order, except: [:create, :mine, :index, :update]
+      before_filter :find_order, except: [:create, :mine, :index]
+      around_filter :lock_order, only: [:update, :destroy]
 
       # Dynamically defines our stores checkout steps to ensure we check authorization on each step.
       Order.checkout_steps.keys.each do |step|
@@ -46,7 +47,6 @@ module Spree
       end
 
       def update
-        find_order(true)
         authorize! :update, @order, order_token
 
         if @order.contents.update_cart(order_params)
@@ -116,8 +116,8 @@ module Spree
           [:import, :number, :completed_at, :locked_at, :channel]
         end
 
-        def find_order(lock = false)
-          @order = Spree::Order.lock(lock).find_by!(number: params[:id])
+        def find_order
+          @order = Spree::Order.find_by!(number: params[:id])
         end
 
         def before_delivery

@@ -2,10 +2,13 @@ module Spree
   module Api
     class ShipmentsController < Spree::Api::BaseController
 
-      before_filter :find_and_update_shipment, only: [:ship, :ready, :add, :remove]
+      before_filter :load_shipment_and_order, only: [:update, :ready, :ship, :add, :remove]
+      before_filter :load_order, only: :create
+      before_filter :update_shipment, only: [:ready, :ship, :add, :remove]
+
+      around_filter :lock_order
 
       def create
-        @order = Spree::Order.find_by!(number: params[:shipment][:order_id])
         authorize! :read, @order
         authorize! :create, Shipment
         variant = Spree::Variant.find(params[:variant_id])
@@ -20,7 +23,6 @@ module Spree
       end
 
       def update
-        @shipment = Spree::Shipment.accessible_by(current_ability, :update).readonly(false).find_by!(number: params[:id])
         @shipment.update_attributes_and_order(shipment_params)
 
         respond_with(@shipment.reload, default_template: :show)
@@ -64,8 +66,12 @@ module Spree
 
       private
 
-      def find_and_update_shipment
+      def load_shipment_and_order
         @shipment = Spree::Shipment.accessible_by(current_ability, :update).readonly(false).find_by!(number: params[:id])
+        @order = @shipment.order
+      end
+
+      def update_shipment
         @shipment.update_attributes(shipment_params)
         @shipment.reload
       end
@@ -76,6 +82,10 @@ module Spree
         else
           {}
         end
+      end
+
+      def load_order
+        @order = Spree::Order.find_by!(number: params[:shipment][:order_id])
       end
     end
   end

@@ -20,12 +20,11 @@ module Spree
         # The current incomplete order from the guest_token for use in cart and during checkout
         def current_order(options = {})
           options[:create_order_if_necessary] ||= false
-          options[:lock] ||= false
 
           return @current_order if @current_order
 
           # Find any incomplete orders for the guest_token
-          @current_order = Spree::Order.includes(:adjustments).lock(options[:lock]).find_by(completed_at: nil, currency: current_currency, guest_token: cookies.signed[:guest_token])
+          @current_order = Spree::Order.includes(:adjustments).find_by(completed_at: nil, currency: current_currency, guest_token: cookies.signed[:guest_token])
 
           if options[:create_order_if_necessary] and (@current_order.nil? or @current_order.completed?)
             @current_order = Spree::Order.new(currency: current_currency, guest_token: cookies.signed[:guest_token])
