@@ -28,7 +28,7 @@ describe "Free shipping promotions", :js => true do
   context "free shipping promotion automatically applied" do
     before do
 
-      visit spree.root_path
+      visit spree_frontend.root_path
       click_link "RoR Mug"
       click_button "add-to-cart-button"
       click_button "Checkout"

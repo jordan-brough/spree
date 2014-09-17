@@ -55,6 +55,7 @@ require 'spree/core/environment/calculators'
 require 'spree/core/environment'
 require 'spree/promo/environment'
 require 'spree/migrations'
+require 'spree/core/extendable_router'
 require 'spree/core/engine'
 
 require 'spree/i18n'

@@ -4,6 +4,8 @@ module Spree
       isolate_namespace Spree
       engine_name 'spree'
 
+      include Spree::Core::ExtendableRouter
+
       rake_tasks do
         load File.join(root, "lib", "tasks", "exchanges.rake")
       end
@@ -105,4 +107,27 @@ module Spree
   end
 end
 
-require 'spree/core/routes'
+# Allow calls to frontend routes through "spree.xxx_path" but deprecate them.
+# Encourage using "spree_frontend.xxx_path" instead.
+Spree::Core::Engine.routes.url_helpers.instance_eval do
+
+  def frontend_url_helpers
+    defined?(Spree::Frontend) && Spree::Frontend::Engine.routes.url_helpers
+  end
+
+  alias respond_to_without_frontend? respond_to?
+
+  def respond_to?(method, include_private=false)
+    respond_to_without_frontend?(method) || frontend_url_helpers.try(:respond_to?, method)
+  end
+
+  def method_missing(method, *args, &block)
+    if !respond_to_without_frontend?(method) && frontend_url_helpers.try(:respond_to?, method)
+      ActiveSupport::Deprecation.warn %(Calling the Spree::Frontend route "#{method}" via `spree.#{method}` is deprecated.  Please use `spree_frontend.#{method}` instead.), caller
+      frontend_url_helpers.send(method, *args, &block)
+    else
+      super
+    end
+  end
+
+end

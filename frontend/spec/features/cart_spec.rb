@@ -2,14 +2,14 @@ require 'spec_helper'
 
 describe "Cart", inaccessible: true do
   it "shows cart icon on non-cart pages" do
-    visit spree.root_path
+    visit spree_frontend.root_path
     page.should have_selector("li#link-to-cart a", :visible => true)
   end
 
   it "prevents double clicking the remove button on cart", :js => true do
     @product = create(:product, :name => "RoR Mug")
 
-    visit spree.root_path
+    visit spree_frontend.root_path
     click_link "RoR Mug"
     click_button "add-to-cart-button"
 
@@ -31,7 +31,7 @@ describe "Cart", inaccessible: true do
 
   it 'allows you to remove an item from the cart', :js => true do
     create(:product, :name => "RoR Mug")
-    visit spree.root_path
+    visit spree_frontend.root_path
     click_link "RoR Mug"
     click_button "add-to-cart-button"
     within("#line_items") do
@@ -48,7 +48,7 @@ describe "Cart", inaccessible: true do
 
   it 'allows you to empty the cart', js: true do
     create(:product, :name => "RoR Mug")
-    visit spree.root_path
+    visit spree_frontend.root_path
     click_link "RoR Mug"
     click_button "add-to-cart-button"
 
@@ -69,15 +69,15 @@ describe "Cart", inaccessible: true do
     before { variant.option_values.destroy_all }
 
     it "still adds product to cart", inaccessible: true do
-      visit spree.product_path(product)
+      visit spree_frontend.product_path(product)
       click_button "add-to-cart-button"
 
-      visit spree.cart_path
+      visit spree_frontend.cart_path
       page.should have_content(product.name)
     end
   end
   it "should have a surrounding element with data-hook='cart_container'" do
-    visit spree.cart_path
+    visit spree_frontend.cart_path
     page.should have_selector("div[data-hook='cart_container']")
   end
 end

@@ -12,7 +12,7 @@ describe 'orders' do
 
   it "can visit an order" do
     # Regression test for current_user call on orders/show
-    lambda { visit spree.order_path(order) }.should_not raise_error
+    lambda { visit spree_frontend.order_path(order) }.should_not raise_error
   end
 
   it "should display line item price" do
@@ -22,7 +22,7 @@ describe 'orders' do
     line_item.price = 19.00
     line_item.save!
 
-    visit spree.order_path(order)
+    visit spree_frontend.order_path(order)
 
     # Tests view spree/shared/_order_details
     within 'td.price' do
@@ -32,7 +32,7 @@ describe 'orders' do
 
   it "should have credit card info if paid with credit card" do
     create(:payment, :order => order)
-    visit spree.order_path(order)
+    visit spree_frontend.order_path(order)
     within '.payment-info' do
       page.should have_content "Ending in 1111"
     end
@@ -40,7 +40,7 @@ describe 'orders' do
 
   it "should have payment method name visible if not paid with credit card" do
     create(:check_payment, :order => order)
-    visit spree.order_path(order)
+    visit spree_frontend.order_path(order)
     within '.payment-info' do
       page.should have_content "Check"
     end
@@ -57,7 +57,7 @@ describe 'orders' do
     end
 
     specify do
-      visit spree.order_path(order)
+      visit spree_frontend.order_path(order)
       within '.payment-info' do
         lambda { find("img") }.should raise_error(Capybara::ElementNotFound)
       end
@@ -65,7 +65,7 @@ describe 'orders' do
   end
 
   it "should return the correct title when displaying a completed order" do
-    visit spree.order_path(order)
+    visit spree_frontend.order_path(order)
 
     within '#order_summary' do
       page.should have_content("#{Spree.t(:order)} #{order.number}")

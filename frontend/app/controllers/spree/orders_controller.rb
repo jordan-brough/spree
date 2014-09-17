@@ -48,7 +48,7 @@ module Spree
         end
       else
         flash[:error] = populator.errors.full_messages.join(" ")
-        redirect_back_or_default(spree.root_path)
+        redirect_back_or_default(spree_frontend.root_path)
       end
     end
 
@@ -57,7 +57,7 @@ module Spree
         @order.empty!
       end
 
-      redirect_to spree.cart_path
+      redirect_to cart_path
     end
 
     def accurate_title
@@ -93,7 +93,7 @@ module Spree
         @order = current_order(lock: true)
         unless @order
           flash[:error] = Spree.t(:order_not_found)
-          redirect_to root_path and return
+          redirect_to spree_frontend.root_path and return
         end
       end
   end

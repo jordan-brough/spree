@@ -28,16 +28,16 @@ describe Spree::OrdersController do
         it "should handle population" do
           populator.should_receive(:populate).with("2", "5", nil).and_return(true)
           spree_post :populate, { :order_id => 1, :variant_id => 2, :quantity => 5 }
-          response.should redirect_to spree.cart_path
+          response.should redirect_to spree_frontend.cart_path
         end
 
         it "shows an error when population fails" do
-          request.env["HTTP_REFERER"] = spree.root_path
+          request.env["HTTP_REFERER"] = spree_frontend.root_path
           populator.should_receive(:populate).with("2", "5", nil).and_return(false)
           populator.stub_chain(:errors, :full_messages).and_return(["Order population failed"])
           spree_post :populate, { :order_id => 1, :variant_id => 2, :quantity => 5 }
           expect(flash[:error]).to eq("Order population failed")
-          response.should redirect_to(spree.root_path)
+          response.should redirect_to(spree_frontend.root_path)
         end
       end
     end
@@ -59,7 +59,7 @@ describe Spree::OrdersController do
         it "should redirect to cart path (on success)" do
           order.stub(:update_attributes).and_return true
           spree_put :update, {}, {:order_id => 1}
-          response.should redirect_to(spree.cart_path)
+          response.should redirect_to(spree_frontend.cart_path)
         end
       end
     end
@@ -73,7 +73,7 @@ describe Spree::OrdersController do
         controller.stub(:current_order).and_return(order)
         order.should_receive(:empty!)
         spree_put :empty
-        response.should redirect_to(spree.cart_path)
+        response.should redirect_to(spree_frontend.cart_path)
       end
     end
 
@@ -87,7 +87,7 @@ describe Spree::OrdersController do
       it "cannot update a blank order" do
         spree_put :update, :order => { :email => "foo" }
         flash[:error].should == Spree.t(:order_not_found)
-        response.should redirect_to(spree.root_path)
+        response.should redirect_to(spree_frontend.root_path)
       end
     end
   end

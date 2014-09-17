@@ -26,26 +26,26 @@ describe Spree::CheckoutController do
     it "should redirect to the cart path unless checkout_allowed?" do
       order.stub :checkout_allowed? => false
       spree_get :edit, { :state => "delivery" }
-      response.should redirect_to(spree.cart_path)
+      response.should redirect_to(spree_frontend.cart_path)
     end
 
     it "should redirect to the cart path if current_order is nil" do
       controller.stub(:current_order).and_return(nil)
       spree_get :edit, { :state => "delivery" }
-      response.should redirect_to(spree.cart_path)
+      response.should redirect_to(spree_frontend.cart_path)
     end
 
     it "should redirect to cart if order is completed" do
       order.stub(:completed? => true)
       spree_get :edit, { :state => "address" }
-      response.should redirect_to(spree.cart_path)
+      response.should redirect_to(spree_frontend.cart_path)
     end
 
     # Regression test for #2280
     it "should redirect to current step trying to access a future step" do
       order.update_column(:state, "address")
       spree_get :edit, { :state => "delivery" }
-      response.should redirect_to spree.checkout_state_path("address")
+      response.should redirect_to spree_frontend.checkout_state_path("address")
     end
 
     context "when entering the checkout" do
@@ -107,7 +107,7 @@ describe Spree::CheckoutController do
 
         it "should redirect the next state" do
           spree_post_address
-          response.should redirect_to spree.checkout_state_path("delivery")
+          response.should redirect_to spree_frontend.checkout_state_path("delivery")
         end
 
         context "current_user respond to save address method" do
@@ -186,7 +186,7 @@ describe Spree::CheckoutController do
         # This inadvertently is a regression test for #2694
         it "should redirect to the order view" do
           spree_post :update, {:state => "confirm"}
-          response.should redirect_to spree.order_path(order)
+          response.should redirect_to spree_frontend.order_path(order)
         end
 
         it "should populate the flash message" do
@@ -233,7 +233,7 @@ describe Spree::CheckoutController do
 
       it "should redirect to the cart_path" do
         spree_post :update, {:state => "confirm"}
-        response.should redirect_to spree.cart_path
+        response.should redirect_to spree_frontend.cart_path
       end
     end
 
@@ -279,7 +279,7 @@ describe Spree::CheckoutController do
           order.shipments.first.shipping_rates.delete_all
           spree_put :update, :order => {}
           flash[:error].should == Spree.t(:items_cannot_be_shipped)
-          response.should redirect_to(spree.checkout_state_path('address'))
+          response.should redirect_to(spree_frontend.checkout_state_path('address'))
         end
       end
 
@@ -293,7 +293,7 @@ describe Spree::CheckoutController do
         it "due to the order having errors" do
           spree_put :update, :order => {}
           flash[:error].should == "Base error\nAdjustments error"
-          response.should redirect_to(spree.checkout_state_path('address'))
+          response.should redirect_to(spree_frontend.checkout_state_path('address'))
         end
       end
     end
@@ -344,7 +344,7 @@ describe Spree::CheckoutController do
       end
 
       it "should redirect to cart" do
-        response.should redirect_to spree.cart_path
+        response.should redirect_to spree_frontend.cart_path
       end
 
       it "should set flash message for no inventory" do

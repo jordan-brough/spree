@@ -13,7 +13,7 @@ describe "Address", inaccessible: true do
   before do
     Capybara.ignore_hidden_elements = false
 
-    visit spree.root_path
+    visit spree_frontend.root_path
 
     click_link "RoR Mug"
     click_button "add-to-cart-button"

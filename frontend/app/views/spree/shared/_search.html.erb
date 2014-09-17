@@ -1,5 +1,5 @@
 <% @taxons = @taxon && @taxon.parent ? @taxon.parent.children : Spree::Taxon.roots %>
-<%= form_tag spree.products_path, :method => :get do %>
+<%= form_tag spree_frontend.products_path, :method => :get do %>
   <% cache(cache_key_for_taxons) do %>
     <%= select_tag :taxon,
           options_for_select([[Spree.t(:all_departments), '']] +

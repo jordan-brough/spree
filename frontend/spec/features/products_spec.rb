@@ -5,7 +5,7 @@ describe "Visiting Products", inaccessible: true do
   include_context "custom products"
 
   before(:each) do
-    visit spree.root_path
+    visit spree_frontend.root_path
   end
 
   it "should be able to show the shopping cart after adding a product to it" do
@@ -30,7 +30,7 @@ describe "Visiting Products", inaccessible: true do
     # Regression tests for #2737
     context "uses руб as the currency symbol" do
       it "on products page" do
-        visit spree.root_path
+        visit spree_frontend.root_path
         within("#product_#{product.id}") do
           within(".price") do
             page.should have_content("руб19.99")
@@ -39,14 +39,14 @@ describe "Visiting Products", inaccessible: true do
       end
 
       it "on product page" do
-        visit spree.product_path(product)
+        visit spree_frontend.product_path(product)
         within(".price") do
           page.should have_content("руб19.99")
         end
       end
 
       it "when adding a product to the cart", :js => true do
-        visit spree.product_path(product)
+        visit spree_frontend.product_path(product)
         click_button "Add To Cart"
         click_link "Home"
         within(".cart-info") do
@@ -55,7 +55,7 @@ describe "Visiting Products", inaccessible: true do
       end
 
       it "when on the 'address' state of the cart" do
-        visit spree.product_path(product)
+        visit spree_frontend.product_path(product)
         click_button "Add To Cart"
         click_button "Checkout"
         within("tr[data-hook=item_total]") do
@@ -131,7 +131,7 @@ describe "Visiting Products", inaccessible: true do
     end
 
     it "should not display no image available" do
-      visit spree.root_path
+      visit spree_frontend.root_path
       page.should have_xpath("//img[contains(@src,'thinking-cat')]")
     end
   end
@@ -140,7 +140,7 @@ describe "Visiting Products", inaccessible: true do
     page.all('ul.product-listing li').size.should == 9
     Spree::Config.show_products_without_price = false
     Spree::Config.currency = "CAN"
-    visit spree.root_path
+    visit spree_frontend.root_path
     page.all('ul.product-listing li').size.should == 0
   end
 
@@ -195,7 +195,7 @@ describe "Visiting Products", inaccessible: true do
 
   it "should be able to put a product without a description in the cart" do
     product = FactoryGirl.create(:base_product, :description => nil, :name => 'Sample', :price => '19.99')
-    visit spree.product_path(product)
+    visit spree_frontend.product_path(product)
     page.should have_content "This product has no description"
     click_button 'add-to-cart-button'
     page.should have_content "This product has no description"
@@ -205,7 +205,7 @@ describe "Visiting Products", inaccessible: true do
     product = FactoryGirl.create(:base_product, :description => nil, :name => 'Sample', :price => '19.99')
     Spree::Config.currency = "CAN"
     Spree::Config.show_products_without_price = true
-    visit spree.product_path(product)
+    visit spree_frontend.product_path(product)
     page.should have_content "This product is not available in the selected currency."
     page.should_not have_content "add-to-cart-button"
   end

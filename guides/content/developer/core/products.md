@@ -136,5 +136,5 @@ Taxons use the [Nested set model](http://en.wikipedia.org/wiki/Nested_set_model)
 
 Taxons link to products through an intermediary model called `Classification`. This model exists so that when a product is deleted, all of the links from that product to its taxons are deleted automatically. A similar action takes place when a taxon is deleted; all of the links to products are deleted automatically.
 
-Linking to a taxon in a controller or a template should be done using the `spree.nested_taxons_path` helper, which will use the taxon's permalink to
+Linking to a taxon in a controller or a template should be done using the `spree_frontend.nested_taxons_path` helper, which will use the taxon's permalink to
 generate a URL such as `/t/categories/brand`.

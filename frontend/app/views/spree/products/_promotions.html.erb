@@ -9,7 +9,7 @@
       <% if promotion.products.any? %>
       <ul>
         <% promotion.products.each do |product| %>
-          <li><%= link_to product.name, product_path(product) %></li>
+          <li><%= link_to product.name, spree_frontend.product_path(product) %></li>
         <% end %>
       </ul>
       <% end %>

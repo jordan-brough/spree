@@ -98,7 +98,7 @@ describe "Checkout", inaccessible: true do
     end
 
     it "redirects to payment page", inaccessible: true do
-      visit spree.checkout_state_path(:delivery)
+      visit spree_frontend.checkout_state_path(:delivery)
       click_button "Save and Continue"
       choose "Credit Card"
       fill_in "Card Number", :with => '123'
@@ -153,7 +153,7 @@ describe "Checkout", inaccessible: true do
     end
 
     it "prevents double clicking the payment button on checkout", :js => true do
-      visit spree.checkout_state_path(:payment)
+      visit spree_frontend.checkout_state_path(:payment)
 
       # prevent form submit to verify button is disabled
       page.execute_script("$('#checkout_form_payment').submit(function(){return false;})")
@@ -165,7 +165,7 @@ describe "Checkout", inaccessible: true do
 
     it "prevents double clicking the confirm button on checkout", :js => true do
       order.payments << create(:payment)
-      visit spree.checkout_state_path(:confirm)
+      visit spree_frontend.checkout_state_path(:confirm)
 
       # prevent form submit to verify button is disabled
       page.execute_script("$('#checkout_form_confirm').submit(function(){return false;})")
@@ -194,7 +194,7 @@ describe "Checkout", inaccessible: true do
       Spree::CheckoutController.any_instance.stub(current_order: order)
       Spree::CheckoutController.any_instance.stub(try_spree_current_user: order.user)
 
-      visit spree.checkout_state_path(:payment)
+      visit spree_frontend.checkout_state_path(:payment)
     end
 
     it "the first payment method should be selected", :js => true do
@@ -226,7 +226,7 @@ describe "Checkout", inaccessible: true do
       Spree::CheckoutController.any_instance.stub(try_spree_current_user: user)
       Spree::OrdersController.any_instance.stub(try_spree_current_user: user)
 
-      visit spree.checkout_state_path(:payment)
+      visit spree_frontend.checkout_state_path(:payment)
     end
 
     it "selects first source available and customer moves on" do
@@ -237,7 +237,7 @@ describe "Checkout", inaccessible: true do
       }.not_to change { Spree::CreditCard.count }
 
       click_on "Place Order"
-      expect(current_path).to eql(spree.order_path(Spree::Order.last))
+      expect(current_path).to eql(spree_frontend.order_path(Spree::Order.last))
     end
 
     it "allows user to enter a new source" do
@@ -253,7 +253,7 @@ describe "Checkout", inaccessible: true do
       }.to change { Spree::CreditCard.count }.by 1
 
       click_on "Place Order"
-      expect(current_path).to eql(spree.order_path(Spree::Order.last))
+      expect(current_path).to eql(spree_frontend.order_path(Spree::Order.last))
     end
   end
 
@@ -268,9 +268,9 @@ describe "Checkout", inaccessible: true do
       fill_in_address
       click_on "Save and Continue"
       click_on "Save and Continue"
-      expect(current_path).to eql(spree.checkout_state_path("payment"))
+      expect(current_path).to eql(spree_frontend.checkout_state_path("payment"))
 
-      visit spree.root_path
+      visit spree_frontend.root_path
       click_link bag.name
       click_button "add-to-cart-button"
 
@@ -279,7 +279,7 @@ describe "Checkout", inaccessible: true do
       click_on "Save and Continue"
       click_on "Save and Continue"
 
-      expect(current_path).to eql(spree.order_path(Spree::Order.last))
+      expect(current_path).to eql(spree_frontend.order_path(Spree::Order.last))
     end
   end
 
@@ -291,12 +291,12 @@ describe "Checkout", inaccessible: true do
       fill_in_address
       click_on "Save and Continue"
       click_on "Save and Continue"
-      expect(current_path).to eql(spree.checkout_state_path("payment"))
+      expect(current_path).to eql(spree_frontend.checkout_state_path("payment"))
     end
 
     context "and updates line item quantity and try to reach payment page" do
       before do
-        visit spree.cart_path
+        visit spree_frontend.cart_path
         within ".cart-item-quantity" do
           fill_in first("input")["name"], with: 3
         end
@@ -305,12 +305,12 @@ describe "Checkout", inaccessible: true do
       end
 
       it "redirects user back to address step" do
-        visit spree.checkout_state_path("payment")
-        expect(current_path).to eql(spree.checkout_state_path("address"))
+        visit spree_frontend.checkout_state_path("payment")
+        expect(current_path).to eql(spree_frontend.checkout_state_path("address"))
       end
 
       it "updates shipments properly through step address -> delivery transitions" do
-        visit spree.checkout_state_path("payment")
+        visit spree_frontend.checkout_state_path("payment")
         click_on "Save and Continue"
         click_on "Save and Continue"
 
@@ -322,18 +322,18 @@ describe "Checkout", inaccessible: true do
       let!(:bag) { create(:product, :name => "RoR Bag") }
 
       before do
-        visit spree.root_path
+        visit spree_frontend.root_path
         click_link bag.name
         click_button "add-to-cart-button"
       end
 
       it "redirects user back to address step" do
-        visit spree.checkout_state_path("payment")
-        expect(current_path).to eql(spree.checkout_state_path("address"))
+        visit spree_frontend.checkout_state_path("payment")
+        expect(current_path).to eql(spree_frontend.checkout_state_path("address"))
       end
 
       it "updates shipments properly through step address -> delivery transitions" do
-        visit spree.checkout_state_path("payment")
+        visit spree_frontend.checkout_state_path("payment")
         click_on "Save and Continue"
         click_on "Save and Continue"
 
@@ -358,7 +358,7 @@ describe "Checkout", inaccessible: true do
       click_on "Save and Continue"
 
       click_on "Save and Continue"
-      expect(current_path).to eql(spree.checkout_state_path("payment"))
+      expect(current_path).to eql(spree_frontend.checkout_state_path("payment"))
     end
 
     it "makes sure payment reflects order total with discounts" do
@@ -382,7 +382,7 @@ describe "Checkout", inaccessible: true do
     context "doesn't fill in coupon code input" do
       it "advances just fine" do
         click_on "Save and Continue"
-        expect(current_path).to eql(spree.order_path(Spree::Order.last))
+        expect(current_path).to eql(spree_frontend.order_path(Spree::Order.last))
       end
     end
   end
@@ -409,7 +409,7 @@ describe "Checkout", inaccessible: true do
     end
 
     it "goes right payment step and place order just fine" do
-      expect(current_path).to eq spree.checkout_state_path('payment')
+      expect(current_path).to eq spree_frontend.checkout_state_path('payment')
 
       choose "Credit Card"
       fill_in "Name on card", :with => 'Spree Commerce'
@@ -418,7 +418,7 @@ describe "Checkout", inaccessible: true do
       fill_in "Card Code", :with => '123'
       click_button "Save and Continue"
 
-      expect(current_path).to eq spree.checkout_state_path('confirm')
+      expect(current_path).to eq spree_frontend.checkout_state_path('confirm')
       click_button "Place Order"
     end
   end
@@ -465,7 +465,7 @@ describe "Checkout", inaccessible: true do
       Spree::CheckoutController.any_instance.stub(:try_spree_current_user => user)
       Spree::OrdersController.any_instance.stub(:try_spree_current_user => user)
 
-      visit spree.checkout_state_path(:delivery)
+      visit spree_frontend.checkout_state_path(:delivery)
       click_button "Save and Continue"
       click_button "Save and Continue"
     end
@@ -475,7 +475,7 @@ describe "Checkout", inaccessible: true do
     end
 
     it "does not display a thank you message on that order future visits" do
-      visit spree.order_path(order)
+      visit spree_frontend.order_path(order)
       expect(page).to_not have_content(Spree.t(:thank_you_for_your_order))
     end
   end
@@ -493,7 +493,7 @@ describe "Checkout", inaccessible: true do
   end
 
   def add_mug_to_cart
-    visit spree.root_path
+    visit spree_frontend.root_path
     click_link mug.name
     click_button "add-to-cart-button"
   end

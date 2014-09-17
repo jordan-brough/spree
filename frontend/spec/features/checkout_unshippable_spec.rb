@@ -23,7 +23,7 @@ describe "checkout with unshippable items", inaccessible: true do
   end
 
   it 'displays and removes' do
-    visit spree.checkout_state_path(:delivery)
+    visit spree_frontend.checkout_state_path(:delivery)
     page.should have_content('Unshippable Items')
 
     click_button "Save and Continue"

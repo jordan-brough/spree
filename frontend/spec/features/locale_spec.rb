@@ -17,7 +17,7 @@ describe "setting locale" do
   end
 
   it "should be in french" do
-    visit spree.root_path
+    visit spree_frontend.root_path
     click_link "Panier"
     page.should have_content("Panier")
   end

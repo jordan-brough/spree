@@ -32,7 +32,7 @@ describe "Coupon code promotions", js: true do
     context "on the payment page" do
       before do
 
-        visit spree.root_path
+        visit spree_frontend.root_path
         click_link "RoR Mug"
         click_button "add-to-cart-button"
         click_button "Checkout"
@@ -80,7 +80,7 @@ describe "Coupon code promotions", js: true do
     context "on the cart page" do
 
       before do
-        visit spree.root_path
+        visit spree_frontend.root_path
         click_link "RoR Mug"
         click_button "add-to-cart-button"
       end
@@ -115,7 +115,7 @@ describe "Coupon code promotions", js: true do
         end
 
         specify do
-          visit spree.cart_path
+          visit spree_frontend.cart_path
 
           fill_in "order_coupon_code", :with => "onetwo"
           click_button "Update"
@@ -143,11 +143,11 @@ describe "Coupon code promotions", js: true do
         end
 
         specify do
-          visit spree.root_path
+          visit spree_frontend.root_path
           click_link "Spree Mug"
           click_button "add-to-cart-button"
 
-          visit spree.cart_path
+          visit spree_frontend.cart_path
           fill_in "order_coupon_code", :with => "onetwo"
           click_button "Update"
 
@@ -186,11 +186,11 @@ describe "Coupon code promotions", js: true do
         end
 
         specify do
-          visit spree.root_path
+          visit spree_frontend.root_path
           click_link "Spree Mug"
           click_button "add-to-cart-button"
 
-          visit spree.cart_path
+          visit spree_frontend.cart_path
 
           within '.cart-total' do
             page.should have_content("$30.00")

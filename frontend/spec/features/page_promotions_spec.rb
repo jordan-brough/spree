@@ -14,7 +14,7 @@ describe 'page promotions' do
    action = Spree::Promotion::Actions::CreateItemAdjustments.create(:calculator => calculator)
    promotion.actions << action
 
-   visit spree.root_path
+   visit spree_frontend.root_path
    click_link "RoR Mug"
    click_button "add-to-cart-button"
   end

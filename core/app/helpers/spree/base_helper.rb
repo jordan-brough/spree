@@ -24,7 +24,7 @@ module Spree
         css_class = 'full'
       end
 
-      link_to text.html_safe, spree.cart_path, :class => "cart-info #{css_class}"
+      link_to text.html_safe, spree_frontend.cart_path, :class => "cart-info #{css_class}"
     end
 
     # human readable list of variant options
@@ -64,7 +64,7 @@ module Spree
     end
 
     def logo(image_path=Spree::Config[:logo])
-      link_to image_tag(image_path), spree.root_path
+      link_to image_tag(image_path), spree_frontend.root_path
     end
 
     def flash_messages(opts = {})
@@ -81,14 +81,14 @@ module Spree
     def breadcrumbs(taxon, separator="&nbsp;&raquo;&nbsp;", breadcrumb_class="inline")
       return "" if current_page?("/") || taxon.nil?
 
-      crumbs = [[Spree.t(:home), spree.root_path]]
+      crumbs = [[Spree.t(:home), spree_frontend.root_path]]
 
       if taxon
-        crumbs << [Spree.t(:products), products_path]
-        crumbs += taxon.ancestors.collect { |a| [a.name, spree.nested_taxons_path(a.permalink)] } unless taxon.ancestors.empty?
-        crumbs << [taxon.name, spree.nested_taxons_path(taxon.permalink)]
+        crumbs << [Spree.t(:products), spree_frontend.products_path]
+        crumbs += taxon.ancestors.collect { |a| [a.name, spree_frontend.nested_taxons_path(a.permalink)] } unless taxon.ancestors.empty?
+        crumbs << [taxon.name, spree_frontend.nested_taxons_path(taxon.permalink)]
       else
-        crumbs << [Spree.t(:products), products_path]
+        crumbs << [Spree.t(:products), spree_frontend.products_path]
       end
 
       separator = raw(separator)
@@ -133,7 +133,7 @@ module Spree
     end
 
     def seo_url(taxon)
-      return spree.nested_taxons_path(taxon.permalink)
+      return spree_frontend.nested_taxons_path(taxon.permalink)
     end
 
     def gem_available?(name)
@@ -157,6 +157,9 @@ module Spree
       if image_style = image_style_from_method_name(method_name)
         define_image_method(image_style)
         self.send(method_name, *args)
+      elsif defined?(spree) && spree.routes.url_helpers.respond_to_without_frontend?(method_name)
+        ActiveSupport::Deprecation.warn %(Calling the Spree route "#{method_name}" via `#{method_name}` is deprecated.  Please use `spree.#{method_name}` instead.), caller
+        spree.send(method_name, *args, &block)
       else
         super
       end

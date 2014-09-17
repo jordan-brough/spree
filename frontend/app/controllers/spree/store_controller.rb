@@ -1,5 +1,6 @@
 module Spree
   class StoreController < Spree::BaseController
+    include Spree::Frontend::Engine.routes.url_helpers
     include Spree::Core::ControllerHelpers::Order
 
     def unauthorized
