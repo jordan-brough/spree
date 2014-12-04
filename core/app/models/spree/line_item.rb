@@ -10,7 +10,12 @@ module Spree
     has_one :product, through: :variant
 
     has_many :adjustments, as: :adjustable, dependent: :destroy
-    has_many :inventory_units, inverse_of: :line_item
+    # Re "dependent: destroy" -- quick fix for inventory units that get stranded
+    # in some out-of-stock scenarios. See ENG-671. It should be safe for Bonobos
+    # because we prevent line item deletion for completed orders.
+    # This might even be an OK thing to have permanently but it's here right now
+    # as a quick fix until we solve the underlying issue.
+    has_many :inventory_units, inverse_of: :line_item, dependent: :destroy
 
     before_validation :copy_price
     before_validation :copy_tax_category
