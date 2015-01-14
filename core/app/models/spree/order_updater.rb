@@ -29,10 +29,6 @@ module Spree
       end
     end
 
-    def recalculate_adjustments
-      all_adjustments.includes(:adjustable).map(&:adjustable).uniq.each { |adjustable| Spree::ItemAdjustments.new(adjustable).update }
-    end
-
     # Updates the following Order total values:
     #
     # +payment_total+      The total value of all finalized Payments (NOTE: non-finalized Payments are excluded)
@@ -194,5 +190,10 @@ module Spree
       def round_money(n)
         (n * 100).round / 100.0
       end
+
+      def recalculate_adjustments
+        all_adjustments.includes(:adjustable).map(&:adjustable).uniq.each { |adjustable| Spree::ItemAdjustments.new(adjustable).update }
+      end
+
   end
 end
