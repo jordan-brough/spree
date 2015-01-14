@@ -81,8 +81,6 @@ module Spree
 
     make_permalink field: :number
 
-    delegate :persist_totals, :to => :updater
-
     def self.by_number(number)
       where(number: number)
     end
@@ -421,9 +419,7 @@ module Spree
 
       self.associate_user!(user) if !self.user && !user.blank?
 
-      updater.update_item_count
-      updater.update_item_total
-      updater.persist_totals
+      updater.update
 
       # So that the destroy doesn't take out line items which may have been re-assigned
       order.line_items.reload
@@ -432,8 +428,6 @@ module Spree
 
     def empty!
       line_items.destroy_all
-      updater.update_item_count
-
       adjustments.destroy_all
       updater.update
     end
@@ -486,8 +480,7 @@ module Spree
     def apply_free_shipping_promotions
       Spree::PromotionHandler::FreeShipping.new(self).activate
       shipments.each { |shipment| ItemAdjustments.new(shipment).update }
-      updater.update_shipment_total
-      persist_totals
+      updater.update
     end
 
     # Clean shipments and make order back to address state
@@ -520,8 +513,7 @@ module Spree
 
     def set_shipments_cost
       shipments.each(&:update_amounts)
-      updater.update_shipment_total
-      persist_totals
+      updater.update
     end
 
     def is_risky?

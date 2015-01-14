@@ -308,7 +308,7 @@ module Spree
           # And then it's time to update shipment states and finally persist
           # order changes
           order.updater.update_shipment_state
-          order.updater.persist_totals
+          order.updater.update
         end
 
         true

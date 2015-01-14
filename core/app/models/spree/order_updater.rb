@@ -67,23 +67,6 @@ module Spree
       update_order_total
     end
 
-    def persist_totals
-      order.update_columns(
-        payment_state: order.payment_state,
-        shipment_state: order.shipment_state,
-        item_total: order.item_total,
-        item_count: order.item_count,
-        adjustment_total: order.adjustment_total,
-        included_tax_total: order.included_tax_total,
-        additional_tax_total: order.additional_tax_total,
-        payment_total: order.payment_total,
-        shipment_total: order.shipment_total,
-        promo_total: order.promo_total,
-        total: order.total,
-        updated_at: Time.now,
-      )
-    end
-
     # Updates the +shipment_state+ attribute according to the following logic:
     #
     # shipped   when all Shipments are in the "shipped" state
@@ -189,9 +172,27 @@ module Spree
       # +total+              The so-called "order total."  This is equivalent to +item_total+ plus +adjustment_total+.
       def update_totals
         order.payment_total = payments.completed.sum(:amount)
+        update_item_count
         update_item_total
         update_shipment_total
         update_adjustment_total
+      end
+
+      def persist_totals
+        order.update_columns(
+          payment_state: order.payment_state,
+          shipment_state: order.shipment_state,
+          item_total: order.item_total,
+          item_count: order.item_count,
+          adjustment_total: order.adjustment_total,
+          included_tax_total: order.included_tax_total,
+          additional_tax_total: order.additional_tax_total,
+          payment_total: order.payment_total,
+          shipment_total: order.shipment_total,
+          promo_total: order.promo_total,
+          total: order.total,
+          updated_at: Time.now,
+        )
       end
 
   end

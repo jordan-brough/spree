@@ -190,8 +190,7 @@ describe Spree::Order do
 
     it "update and persist totals" do
       expect(shipment).to receive :update_amounts
-      expect(order.updater).to receive :update_shipment_total
-      expect(order.updater).to receive :persist_totals
+      expect(order.updater).to receive :update
 
       order.set_shipments_cost
     end
@@ -826,8 +825,7 @@ describe Spree::Order do
       Spree::ItemAdjustments.should_receive(:new).with(shipment).and_return(adjuster = double)
       adjuster.should_receive(:update)
 
-      order.updater.should_receive(:update_shipment_total)
-      order.updater.should_receive(:persist_totals)
+      order.updater.should_receive(:update)
       order.apply_free_shipping_promotions
     end
   end
