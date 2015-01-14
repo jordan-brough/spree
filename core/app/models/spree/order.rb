@@ -83,9 +83,6 @@ module Spree
 
     delegate :update_totals, :persist_totals, :to => :updater
 
-    class_attribute :update_hooks
-    self.update_hooks = Set.new
-
     def self.by_number(number)
       where(number: number)
     end
@@ -115,12 +112,6 @@ module Spree
 
     def self.incomplete
       where(completed_at: nil)
-    end
-
-    # Use this method in other gems that wish to register their own custom logic
-    # that should be called after Order#update
-    def self.register_update_hook(hook)
-      self.update_hooks.add(hook)
     end
 
     def all_adjustments
@@ -345,7 +336,6 @@ module Spree
 
       updater.update_shipment_state
       save
-      updater.run_hooks
 
       touch :completed_at
 
