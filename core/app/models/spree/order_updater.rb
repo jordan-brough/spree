@@ -29,21 +29,6 @@ module Spree
       end
     end
 
-    # Updates the following Order total values:
-    #
-    # +payment_total+      The total value of all finalized Payments (NOTE: non-finalized Payments are excluded)
-    # +item_total+         The total value of all LineItems
-    # +adjustment_total+   The total value of all adjustments (promotions, credits, etc.)
-    # +promo_total+        The total value of all promotion adjustments
-    # +total+              The so-called "order total."  This is equivalent to +item_total+ plus +adjustment_total+.
-    def update_totals
-      order.payment_total = payments.completed.sum(:amount)
-      update_item_total
-      update_shipment_total
-      update_adjustment_total
-    end
-
-
     # give each of the shipments a chance to update themselves
     def update_shipments
       shipments.each { |shipment| shipment.update!(order) }
@@ -193,6 +178,20 @@ module Spree
 
       def recalculate_adjustments
         all_adjustments.includes(:adjustable).map(&:adjustable).uniq.each { |adjustable| Spree::ItemAdjustments.new(adjustable).update }
+      end
+
+      # Updates the following Order total values:
+      #
+      # +payment_total+      The total value of all finalized Payments (NOTE: non-finalized Payments are excluded)
+      # +item_total+         The total value of all LineItems
+      # +adjustment_total+   The total value of all adjustments (promotions, credits, etc.)
+      # +promo_total+        The total value of all promotion adjustments
+      # +total+              The so-called "order total."  This is equivalent to +item_total+ plus +adjustment_total+.
+      def update_totals
+        order.payment_total = payments.completed.sum(:amount)
+        update_item_total
+        update_shipment_total
+        update_adjustment_total
       end
 
   end

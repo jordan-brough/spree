@@ -15,7 +15,7 @@ module Spree
       it "updates payment totals" do
         order.stub_chain(:payments, :completed, :sum).and_return(10)
 
-        updater.update_totals
+        updater.update
         order.payment_total.should == 10
       end
 

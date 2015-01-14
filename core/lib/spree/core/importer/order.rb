@@ -27,8 +27,7 @@ module Spree
 
             order.update_attributes!(params)
             # Really ensure that the order totals are correct
-            order.update_totals
-            order.persist_totals
+            order.updater.update
             order.reload
           rescue Exception => e
             order.destroy if order && order.persisted?

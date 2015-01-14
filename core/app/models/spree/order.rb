@@ -81,7 +81,7 @@ module Spree
 
     make_permalink field: :number
 
-    delegate :update_totals, :persist_totals, :to => :updater
+    delegate :persist_totals, :to => :updater
 
     def self.by_number(number)
       where(number: number)
@@ -435,8 +435,7 @@ module Spree
       updater.update_item_count
 
       adjustments.destroy_all
-      update_totals
-      persist_totals
+      updater.update
     end
 
     def has_step?(step)

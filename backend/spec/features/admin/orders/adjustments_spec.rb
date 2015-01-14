@@ -24,8 +24,7 @@ describe "Adjustments" do
 
   before(:each) do
     # To ensure the order totals are correct
-    order.update_totals
-    order.persist_totals
+    order.updater.update
 
     visit spree.admin_path
     click_link "Orders"

@@ -446,8 +446,7 @@ describe Spree::Order do
     it "clears out line items, adjustments and update totals" do
       expect(order.line_items).to receive(:destroy_all)
       expect(order.adjustments).to receive(:destroy_all)
-      expect(order.updater).to receive(:update_totals)
-      expect(order.updater).to receive(:persist_totals)
+      expect(order.updater).to receive(:update)
 
       order.empty!
       expect(order.item_total).to eq 0
