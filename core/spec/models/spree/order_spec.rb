@@ -204,8 +204,11 @@ describe Spree::Order do
     end
 
     it "should set completed_at" do
-      order.should_receive(:touch).with(:completed_at)
-      order.finalize!
+      Timecop.freeze do |now|
+        expect { order.finalize! }.to change {
+          order.completed_at
+        }.from(nil).to(now)
+      end
     end
 
     it "should sell inventory units" do
@@ -264,10 +267,10 @@ describe Spree::Order do
       # and it's irrelevant to this test
       order.stub :has_available_shipment
       Spree::OrderMailer.stub_chain :confirm_email, :deliver
-      adjustments = [double]
-      order.should_receive(:all_adjustments).and_return(adjustments)
-      adjustments.each do |adj|
-	expect(adj).to receive(:close)
+      # adjustments = [double]
+      create(:adjustment, order: order)
+      order.adjustments.each do |adj|
+      	expect(adj).to receive(:close)
       end
       order.finalize!
     end
