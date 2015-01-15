@@ -61,7 +61,7 @@ module Spree
           :additional_tax_total => 0.05,
           :included_tax_total => 0.05,
         })
-        updater.update_adjustment_total
+        updater.update
         order.adjustment_total.should == 10.05
         order.additional_tax_total.should == 0.05
         order.included_tax_total.should == 0.05
