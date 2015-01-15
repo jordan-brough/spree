@@ -20,7 +20,7 @@ module Spree
       end
 
       it "update item total" do
-        updater.update_item_total
+        updater.update
         order.item_total.should == 20
       end
 

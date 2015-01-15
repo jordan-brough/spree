@@ -34,11 +34,6 @@ module Spree
       update_order_total
     end
 
-    def update_item_total
-      order.item_total = line_items.map(&:amount).sum
-      update_order_total
-    end
-
     # Updates the +shipment_state+ attribute according to the following logic:
     #
     # shipped   when all Shipments are in the "shipped" state
@@ -176,6 +171,11 @@ module Spree
 
       def update_item_count
         order.item_count = quantity
+      end
+
+      def update_item_total
+        order.item_total = line_items.map(&:amount).sum
+        update_order_total
       end
 
       def persist_totals
