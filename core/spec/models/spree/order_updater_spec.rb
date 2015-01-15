@@ -109,69 +109,82 @@ module Spree
 
     context "updating payment state" do
       it "is void if the order is canceled with payments" do
-        order.stub(:state).and_return('canceled')
-        order.stub_chain(:payments, :present?).and_return('true')
+        order.update_columns(completed_at: Time.now, state: 'canceled')
+        create(:payment, order: order)
 
-        updater.update_payment_state
+        updater.update
         order.payment_state.should == 'void'
       end
 
       it "is failed if last payment failed" do
-        order.stub_chain(:payments, :last, :state).and_return('failed')
+        order.update_columns(completed_at: Time.now)
+        create(:payment, order: order, state: 'failed')
 
-        updater.update_payment_state
+        updater.update
         order.payment_state.should == 'failed'
       end
 
       # Regression test for #4281
       it "is credit_owed if payment taken, but no line items" do
-        order.stub_chain(:line_items, :empty?).and_return(true)
-        order.stub_chain(:payments, :last, :state).and_return('completed')
+        order.empty!
+        order.update_columns(completed_at: Time.now)
+        create(:payment, order: order, state: 'completed')
 
-        updater.update_payment_state
+        updater.update
         order.payment_state.should == 'credit_owed'
       end
 
       it "is balance due with one pending payment" do
-        order.stub_chain(:payments, :last, :state).and_return('pending')
+        order.update_columns(completed_at: Time.now)
+        create(:payment, order: order, state: 'pending')
 
-        updater.update_payment_state
+        updater.update
         order.payment_state.should == 'balance_due'
       end
 
       it "is balance due with no line items" do
-        order.stub_chain(:line_items, :empty?).and_return(true)
+        order.empty!
+        order.update_columns(completed_at: Time.now)
 
-        updater.update_payment_state
+        updater.update
         order.payment_state.should == 'balance_due'
       end
 
-      it "is credit owed if payment is above total" do
-        order.stub_chain(:line_items, :empty?).and_return(false)
-        order.stub :payment_total => 31
-        order.stub :total => 30
+      context "with line items" do
+        let(:order) { create(:order_with_line_items) }
 
-        updater.update_payment_state
-        order.payment_state.should == 'credit_owed'
-      end
+        it "is credit owed if payment is above total" do
+          order.update_columns(completed_at: Time.now)
+          create(:payment, order: order, state: 'completed')
 
-      it "is paid if order is paid in full" do
-        order.stub_chain(:line_items, :empty?).and_return(false)
-        order.stub :payment_total => 30
-        order.stub :total => 30
+          order.stub :payment_total => 31
+          order.stub :total => 30
 
-        updater.update_payment_state
-        order.payment_state.should == 'paid'
-      end
+          updater.update
+          order.payment_state.should == 'credit_owed'
+        end
 
-      it "is balance due if payment total is less than order total" do
-        order.stub_chain(:line_items, :empty?).and_return(false)
-        order.stub_chain(:payments, :last, :state).and_return('completed')
-        order.stub :payment_total => 29
-        order.stub :total => 30
+        it "is paid if order is paid in full" do
+          order.update_columns(completed_at: Time.now)
+          create(:payment, order: order, state: 'completed')
 
-        updater.update_payment_state
-        order.payment_state.should == 'balance_due'
+          order.stub :payment_total => 30
+          order.stub :total => 30
+
+          updater.update
+          order.payment_state.should == 'paid'
+        end
+
+        it "is balance due if payment total is less than order total" do
+          order.update_columns(completed_at: Time.now)
+          create(:payment, order: order, state: 'completed')
+
+          order.stub :payment_total => 29
+          order.stub :total => 30
+
+          updater.update
+          order.payment_state.should == 'balance_due'
+        end
       end
     end
 
