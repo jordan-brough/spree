@@ -90,7 +90,7 @@ describe "Checkout", inaccessible: true do
 
       user = create(:user)
       order.user = user
-      order.update!
+      order.updater.update
 
       Spree::CheckoutController.any_instance.stub(:current_order => order)
       Spree::CheckoutController.any_instance.stub(:try_spree_current_user => user)
@@ -118,7 +118,7 @@ describe "Checkout", inaccessible: true do
 
       order.reload
       order.user = user
-      order.update!
+      order.updater.update
       order
     end
 
@@ -165,7 +165,7 @@ describe "Checkout", inaccessible: true do
       order = OrderWalkthrough.up_to(:delivery)
       order.stub(:available_payment_methods => [check_payment,credit_cart_payment])
       order.user = create(:user)
-      order.update!
+      order.updater.update
 
       Spree::CheckoutController.any_instance.stub(current_order: order)
       Spree::CheckoutController.any_instance.stub(try_spree_current_user: order.user)

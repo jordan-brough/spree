@@ -14,7 +14,7 @@ describe "checkout with unshippable items", inaccessible: true do
 
     user = create(:user)
     order.user = user
-    order.update!
+    order.updater.update
 
     Spree::CheckoutController.any_instance.stub(:current_order => order)
     Spree::CheckoutController.any_instance.stub(:try_spree_current_user => user)

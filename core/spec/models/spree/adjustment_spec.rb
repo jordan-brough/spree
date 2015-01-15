@@ -5,7 +5,7 @@ require 'spec_helper'
 
 describe Spree::Adjustment do
 
-  let(:order) { mock_model(Spree::Order, update!: nil) }
+  let(:order) { mock_model(Spree::Order).tap { |m| m.stub_chain(:updater, :update) } }
   let(:adjustment) { Spree::Adjustment.create(:label => "Adjustment", :amount => 5) }
 
   describe 'non_tax scope' do

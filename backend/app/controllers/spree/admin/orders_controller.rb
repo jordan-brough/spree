@@ -81,7 +81,7 @@ module Spree
 
       def update
         if @order.update_attributes(params[:order]) && @order.line_items.present?
-          @order.update!
+          @order.updater.update
           unless @order.complete?
             # Jump to next step if order is not complete.
             redirect_to admin_order_customer_path(@order) and return

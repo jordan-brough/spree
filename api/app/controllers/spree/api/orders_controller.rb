@@ -35,7 +35,7 @@ module Spree
       def empty
         authorize! :update, @order, order_token
         @order.empty!
-        @order.update!
+        @order.updater.update
         render text: nil, status: 200
       end
 
@@ -64,7 +64,7 @@ module Spree
           deal_with_line_items if params[:order][:line_items]
 
           @order.line_items.reload
-          @order.update!
+          @order.updater.update
           respond_with(@order, default_template: :show)
         else
           invalid_resource!(@order)

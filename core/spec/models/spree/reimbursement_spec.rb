@@ -73,7 +73,7 @@ describe Spree::Reimbursement do
         shipment.update_column('state', 'shipped')
       end
       order.reload
-      order.update!
+      order.updater.update
       if payment
         payment.save!
         order.next! # confirm

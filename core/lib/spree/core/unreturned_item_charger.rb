@@ -23,7 +23,7 @@ module Spree
 
       add_exchange_variants_to_order
 
-      new_order.reload.update!
+      new_order.reload.updater.update
       while new_order.state != new_order.checkout_steps[-2] && new_order.next; end
 
       set_order_payment

@@ -23,10 +23,6 @@ describe Spree::Shipment do
 
   # Regression test for #4063
   context "number generation" do
-    before do
-      order.stub :update!
-    end
-
     it "generates a number containing a letter + 11 numbers" do
       shipment.save
       shipment.number[0].should == "H"
@@ -292,8 +288,6 @@ describe Spree::Shipment do
 
   context "#cancel" do
     it 'cancels the shipment' do
-      shipment.order.stub(:update!)
-
       shipment.state = 'pending'
       shipment.should_receive(:after_cancel)
       shipment.cancel!
@@ -338,8 +332,6 @@ describe Spree::Shipment do
 
   context "#resume" do
     it 'will determine new state based on order' do
-      shipment.order.stub(:update!)
-
       shipment.state = 'canceled'
       shipment.should_receive(:determine_state).and_return(:ready)
       shipment.should_receive(:after_resume)
@@ -355,8 +347,6 @@ describe Spree::Shipment do
     end
 
     it 'will determine new state based on order' do
-      shipment.order.stub(:update!)
-
       shipment.state = 'canceled'
       shipment.should_receive(:determine_state).twice.and_return('ready')
       shipment.should_receive(:after_resume)
@@ -371,7 +361,6 @@ describe Spree::Shipment do
       let(:shipment_with_inventory_units) { create(:shipment, order: create(:order_with_line_items), state: 'canceled') }
       let(:subject) { shipment_with_inventory_units.ship! }
       before do
-        order.stub(:update!)
         shipment_with_inventory_units.stub(require_inventory: false, update_order: true)
       end
 
@@ -387,7 +376,6 @@ describe Spree::Shipment do
     ['ready', 'canceled'].each do |state|
       context "from #{state}" do
         before do
-          order.stub(:update!)
           shipment.stub(require_inventory: false, update_order: true, state: state)
         end
 

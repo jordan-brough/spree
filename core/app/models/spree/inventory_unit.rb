@@ -91,7 +91,7 @@ module Spree
       end
 
       def update_order
-        order.update!
+        order.updater.update
       end
 
       def percentage_of_line_item

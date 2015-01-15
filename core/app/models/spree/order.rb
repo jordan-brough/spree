@@ -216,10 +216,6 @@ module Spree
       @updater ||= OrderUpdater.new(self)
     end
 
-    def update!
-      updater.update
-    end
-
     def clone_billing_address
       if bill_address and self.ship_address.nil?
         self.ship_address = bill_address.clone

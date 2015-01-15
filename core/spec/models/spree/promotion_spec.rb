@@ -430,7 +430,7 @@ describe Spree::Promotion do
       expect(order.adjustment_total).to eq 0
 
       promo.activate order: order
-      order.update!
+      order.updater.update
 
       expect(line_item.adjustments).to have(1).item
       expect(order.adjustment_total).to eq -5
