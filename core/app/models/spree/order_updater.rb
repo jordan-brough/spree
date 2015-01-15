@@ -34,10 +34,6 @@ module Spree
       update_order_total
     end
 
-    def update_order_total
-      order.total = order.item_total + order.shipment_total + order.adjustment_total
-    end
-
     def update_adjustment_total
       recalculate_adjustments
       order.adjustment_total = line_items.sum(:adjustment_total) +
@@ -176,6 +172,10 @@ module Spree
       # give each of the shipments a chance to update themselves
       def update_shipments
         shipments.each { |shipment| shipment.update!(order) }
+      end
+
+      def update_order_total
+        order.total = order.item_total + order.shipment_total + order.adjustment_total
       end
 
       def persist_totals
