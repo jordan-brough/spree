@@ -371,7 +371,7 @@ module Spree
       if pending_payments.empty?
         raise Core::GatewayError.new Spree.t(:no_pending_payments)
       else
-        pending_payments.each do |payment|
+        pending_payments.sort_by { |p| [p.created_at, p.id] }.each do |payment|
           break if payment_total >= total
 
           payment.process!
