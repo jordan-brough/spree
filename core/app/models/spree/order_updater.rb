@@ -34,10 +34,6 @@ module Spree
       update_order_total
     end
 
-    def update_item_count
-      order.item_count = quantity
-    end
-
     def update_item_total
       order.item_total = line_items.map(&:amount).sum
       update_order_total
@@ -176,6 +172,10 @@ module Spree
                             adjustments.promotion.eligible.sum(:amount)
 
         update_order_total
+      end
+
+      def update_item_count
+        order.item_count = quantity
       end
 
       def persist_totals
