@@ -29,11 +29,6 @@ module Spree
       end
     end
 
-    # give each of the shipments a chance to update themselves
-    def update_shipments
-      shipments.each { |shipment| shipment.update!(order) }
-    end
-
     def update_shipment_total
       order.shipment_total = shipments.sum(:cost)
       update_order_total
@@ -176,6 +171,11 @@ module Spree
         update_item_total
         update_shipment_total
         update_adjustment_total
+      end
+
+      # give each of the shipments a chance to update themselves
+      def update_shipments
+        shipments.each { |shipment| shipment.update!(order) }
       end
 
       def persist_totals

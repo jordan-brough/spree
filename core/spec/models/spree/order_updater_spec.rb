@@ -210,9 +210,10 @@ module Spree
         shipments.stub :ready => []
         shipments.stub :pending => []
         shipments.stub :shipped => []
+        shipments.stub :sum => 0
 
         shipment.should_receive(:update!).with(order)
-        updater.update_shipments
+        updater.update
       end
     end
 
@@ -239,7 +240,7 @@ module Spree
         shipments.stub :shipped => []
 
         updater.stub(:update_totals) # Otherwise this gets called and causes a scene
-        expect(updater).not_to receive(:update_shipments).with(order)
+        expect(updater).not_to receive(:update_shipments)
         updater.update
       end
     end
