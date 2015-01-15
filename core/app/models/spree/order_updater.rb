@@ -29,11 +29,6 @@ module Spree
       end
     end
 
-    def update_shipment_total
-      order.shipment_total = shipments.sum(:cost)
-      update_order_total
-    end
-
     # Updates the +shipment_state+ attribute according to the following logic:
     #
     # shipped   when all Shipments are in the "shipped" state
@@ -105,6 +100,11 @@ module Spree
       # give each of the shipments a chance to update themselves
       def update_shipments
         shipments.each { |shipment| shipment.update!(order) }
+      end
+
+      def update_shipment_total
+        order.shipment_total = shipments.sum(:cost)
+        update_order_total
       end
 
       def update_order_total

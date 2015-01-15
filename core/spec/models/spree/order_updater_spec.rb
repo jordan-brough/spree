@@ -26,7 +26,7 @@ module Spree
 
       it "update shipment total" do
         create(:shipment, :order => order, :cost => 10)
-        updater.update_shipment_total
+        updater.update
         order.shipment_total.should == 10
       end
 
