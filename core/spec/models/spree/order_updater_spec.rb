@@ -70,39 +70,45 @@ module Spree
 
     context "updating shipment state" do
       before do
-        order.stub :backordered? => false
-        order.stub_chain(:shipments, :shipped, :count).and_return(0)
-        order.stub_chain(:shipments, :ready, :count).and_return(0)
-        order.stub_chain(:shipments, :pending, :count).and_return(0)
+        order.update_columns(completed_at: Time.now, state: 'complete')
       end
 
       it "is backordered" do
         order.stub :backordered? => true
-        updater.update_shipment_state
+        updater.update
 
         order.shipment_state.should == 'backorder'
       end
 
       it "is nil" do
-        order.stub_chain(:shipments, :states).and_return([])
-        order.stub_chain(:shipments, :count).and_return(0)
-
-        updater.update_shipment_state
+        updater.update
         order.shipment_state.should be_nil
       end
 
+      it "is pending" do
+        create(:shipment, order: order)
+        updater.update
+        order.shipment_state.should == 'pending'
+      end
 
-      ["shipped", "ready", "pending"].each do |state|
-        it "is #{state}" do
-          order.stub_chain(:shipments, :states).and_return([state])
-          updater.update_shipment_state
-          order.shipment_state.should == state.to_s
-        end
+      it "is ready" do
+        order.stub paid?: true
+        create(:shipment, order: order)
+        updater.update
+        order.shipment_state.should == 'ready'
+      end
+
+      it "is shipped" do
+        create(:shipment, order: order, state: 'shipped')
+        updater.update
+        order.shipment_state.should == 'shipped'
       end
 
       it "is partial" do
-        order.stub_chain(:shipments, :states).and_return(["pending", "ready"])
-        updater.update_shipment_state
+        order.stub paid?: true
+        create(:shipment, order: order, state: 'shipped')
+        create(:shipment, order: order)
+        updater.update
         order.shipment_state.should == 'partial'
       end
     end
