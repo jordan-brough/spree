@@ -74,6 +74,13 @@ module Spree
       other_order.destroy
     end
 
+    def empty
+      order.line_items.destroy_all
+      order.updater.update_item_count
+      order.adjustments.destroy_all
+      order.update!
+    end
+
     private
       def order_updater
         @updater ||= OrderUpdater.new(order)
