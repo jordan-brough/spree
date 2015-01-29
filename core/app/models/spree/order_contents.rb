@@ -76,9 +76,8 @@ module Spree
 
     def empty
       order.line_items.destroy_all
-      order.updater.update_item_count
       order.adjustments.destroy_all
-      order.update!
+      reload_totals
     end
 
     private
