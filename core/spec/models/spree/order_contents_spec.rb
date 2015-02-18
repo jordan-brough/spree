@@ -435,4 +435,36 @@ describe Spree::OrderContents do
 
   end
 
+  describe "refresh_shipment_rates" do
+    let!(:order) { create(:order_with_line_items, line_items_count: 1) }
+    let(:shipment) { order.shipments.first }
+    let(:stubbed_shipping_rates) do
+      [ Spree::ShippingRate.create! ]
+    end
+
+    before do
+      allow_any_instance_of(Spree::Stock::Estimator).to(
+        receive(:shipping_rates).and_return(stubbed_shipping_rates)
+      )
+    end
+
+    context 'when the order is not complete' do
+      it 'refreshes the rates' do
+        order.contents.refresh_shipment_rates
+        expect(shipment.shipping_rates.reload).to eq stubbed_shipping_rates
+      end
+    end
+
+    context 'when the order is complete' do
+      before do
+        shipment.update_attributes!(state: 'shipped')
+      end
+
+      it 'does not refresh the rates' do
+        order.contents.refresh_shipment_rates
+        expect(shipment.shipping_rates.reload).not_to eq stubbed_shipping_rates
+      end
+    end
+  end
+
 end

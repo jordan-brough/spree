@@ -136,6 +136,10 @@ module Spree
       true
     end
 
+    def refresh_shipment_rates
+      order.refresh_shipment_rates
+    end
+
     private
       def order_updater
         @updater ||= OrderUpdater.new(order)
