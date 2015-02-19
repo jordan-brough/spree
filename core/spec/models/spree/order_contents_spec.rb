@@ -442,16 +442,11 @@ describe Spree::OrderContents do
       [ Spree::ShippingRate.create! ]
     end
 
-    before do
-      allow_any_instance_of(Spree::Stock::Estimator).to(
-        receive(:shipping_rates).and_return(stubbed_shipping_rates)
-      )
-    end
-
     context 'when the order is not complete' do
       it 'refreshes the rates' do
+        new_shipping_method = create(:shipping_method)
         order.contents.refresh_shipment_rates
-        expect(shipment.shipping_rates.reload).to eq stubbed_shipping_rates
+        expect(shipment.shipping_methods.reload).to include(new_shipping_method)
       end
     end
 
@@ -461,8 +456,9 @@ describe Spree::OrderContents do
       end
 
       it 'does not refresh the rates' do
+        new_shipping_method = create(:shipping_method)
         order.contents.refresh_shipment_rates
-        expect(shipment.shipping_rates.reload).not_to eq stubbed_shipping_rates
+        expect(shipment.shipping_methods.reload).not_to include(new_shipping_method)
       end
     end
   end
