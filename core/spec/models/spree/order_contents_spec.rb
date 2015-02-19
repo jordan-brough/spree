@@ -438,9 +438,6 @@ describe Spree::OrderContents do
   describe "refresh_shipment_rates" do
     let!(:order) { create(:order_with_line_items, line_items_count: 1) }
     let(:shipment) { order.shipments.first }
-    let(:stubbed_shipping_rates) do
-      [ Spree::ShippingRate.create! ]
-    end
 
     context 'when the order is not complete' do
       it 'refreshes the rates' do
