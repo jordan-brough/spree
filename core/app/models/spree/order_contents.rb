@@ -137,7 +137,7 @@ module Spree
     end
 
     def refresh_shipment_rates
-      order.refresh_shipment_rates
+      order.shipments.map(&:refresh_rates)
     end
 
     private
