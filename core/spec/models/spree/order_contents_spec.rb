@@ -439,7 +439,7 @@ describe Spree::OrderContents do
     let!(:order) { create(:order_with_line_items, line_items_count: 1) }
     let(:shipment) { order.shipments.first }
 
-    context 'when the order is not complete' do
+    context 'when the shipment is not shipped' do
       it 'refreshes the rates' do
         new_shipping_method = create(:shipping_method)
         order.contents.refresh_shipment_rates
@@ -447,7 +447,7 @@ describe Spree::OrderContents do
       end
     end
 
-    context 'when the order is complete' do
+    context 'when the shipment is shipped' do
       before do
         shipment.update_attributes!(state: 'shipped')
       end
