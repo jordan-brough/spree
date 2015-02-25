@@ -17,9 +17,20 @@ describe "Orders Listing" do
     end
 
     it "should list existing orders" do
-      within_row(1) do
-        column_text(2).should == "R100"
-        column_text(3).should == "cart"
+      begin
+        within_row(1) do
+          column_text(2).should == "R100"
+          column_text(3).should == "cart"
+        end
+      rescue NoMethodError
+        puts "page.current_path: #{page.current_path.inspect}"
+        if page.current_path
+          puts "page.status_code: #{page.status_code.inspect}"
+          puts "page.response_headers: #{page.response_headers.inspect}"
+          puts "page.body:"
+          puts page.body
+        end
+        raise
       end
 
       within_row(2) do
