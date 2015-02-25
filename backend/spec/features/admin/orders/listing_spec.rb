@@ -13,6 +13,7 @@ describe "Orders Listing" do
 
   context "listing orders" do
     before(:each) do
+      expect(Spree::Order.complete.count).to eq 2
       click_link "Orders"
     end
 
