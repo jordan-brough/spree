@@ -6,6 +6,10 @@ module Spree
 
     def checkout_progress
       states = checkout_states
+      if Spree::Frontend::Config.hide_confirm_step && !@order.confirm?
+        states -= ['confirm']
+      end
+
       items = states.map do |state|
         text = Spree.t("order_state.#{state}").titleize
 

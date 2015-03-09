@@ -28,11 +28,21 @@ module Spree
     def update
       if @order.update_from_params(params, permitted_checkout_attributes)
         @order.temporary_address = !params[:save_user_address]
-        success = if params[:state] == 'confirm'
+
+        if Spree::Frontend::Config.hide_confirm_step && next_checkout_step == 'confirm'
+          if !@order.next
+            flash[:error] = @order.errors.full_messages.join("\n")
+            redirect_to checkout_state_path(@order.state)
+            return
+          end
+        end
+
+        success = if @order.confirm?
           @order.complete
         else
           @order.next
         end
+
         if !success
           flash[:error] = @order.errors.full_messages.join("\n")
           redirect_to checkout_state_path(@order.state) and return
@@ -148,6 +158,10 @@ module Spree
 
       def check_authorization
         authorize!(:edit, current_order, session[:access_token])
+      end
+
+      def next_checkout_step
+        @order.checkout_steps[@order.checkout_step_index(@order.state)+1]
       end
   end
 end
