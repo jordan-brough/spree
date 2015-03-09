@@ -905,7 +905,16 @@ describe Spree::Order do
     end
 
     context "shipment created after order" do
-      it { should be false }
+      it do
+        if subject != false
+          puts "HUHHHHHHHHHHHHH?"
+          puts "order:"
+          p order
+          puts "shipments:"
+          p order.shipments.to_a
+        end
+        should be false
+      end
     end
 
     context "shipment created before order" do
