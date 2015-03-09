@@ -914,6 +914,7 @@ describe Spree::Order do
           p order.shipments.to_a
           puts "order created_at: #{order.created_at.to_f}"
           puts "shipments created_at: #{order.shipments.map { |s| s.created_at.to_f }}"
+          puts "shipiments.first created_at: #{order.shipments.first.created_at.to_f}"
         end
         should be false
       end
