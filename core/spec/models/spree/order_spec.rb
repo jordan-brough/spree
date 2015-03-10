@@ -896,7 +896,7 @@ describe Spree::Order do
 
   describe "#unreturned_exchange?" do
     let(:order) { create(:order_with_line_items) }
-    subject { order.unreturned_exchange? }
+    subject { order.reload.unreturned_exchange? }
 
     context "the order does not have a shipment" do
       before { order.shipments.destroy_all }
@@ -906,17 +906,6 @@ describe Spree::Order do
 
     context "shipment created after order" do
       it do
-        if subject != false
-          puts "HUHHHHHHHHHHHHH?"
-          puts "order:"
-          p order
-          puts "shipments:"
-          p order.shipments.to_a
-          puts "order created_at: #{order.created_at.to_f}"
-          puts "shipments created_at: #{order.shipments.map { |s| s.created_at.to_f }}"
-          puts "order.reload.created_at: #{order.reload.created_at.to_f}"
-          puts "order.shipments.reload.created_at: #{order.shipments.reload.map(&:created_at).map(&:to_f)}"
-        end
         should be false
       end
     end
