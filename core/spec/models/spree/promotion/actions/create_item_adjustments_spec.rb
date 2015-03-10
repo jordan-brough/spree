@@ -57,8 +57,11 @@ module Spree
               end
 
               it "does not create an adjustmenty for line_items not in product rule" do
+                expect(action.adjustments.count).to eql 0
                 action.perform(payload)
                 expect(action.adjustments.count).to eql 1
+                puts "action.adjustments:"
+                puts action.adjustments.map(&:inspect)
                 expect(line_item.reload.adjustments).to match_array action.adjustments
                 expect(second_line_item.reload.adjustments).to be_empty
               end
