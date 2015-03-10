@@ -109,7 +109,7 @@ module Spree
             # regression spec for #4515
             it "successfully activates promo" do
               subject.apply
-              expect(subject).to be_successful
+              expect(subject).to be_successful, subject.error
               expect_order_connection(order: order, promotion: promotion, promotion_code: promotion_code)
               order.line_items.each do |line_item|
                 expect_adjustment_creation(adjustable: line_item, promotion: promotion, promotion_code: promotion_code)
