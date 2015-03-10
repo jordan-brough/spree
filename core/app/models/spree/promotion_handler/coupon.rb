@@ -16,6 +16,9 @@ module Spree
             if promotion_code && promotion_code.promotion.expired?
               self.error = Spree.t(:coupon_code_expired)
             else
+              if $debug
+                puts "apply failed"
+              end
               self.error = Spree.t(:coupon_code_not_found)
             end
           end
@@ -88,6 +91,9 @@ module Spree
           self.success = Spree.t(:coupon_code_applied)
         else
           # if the promotion was created after the order
+          if $debug
+            puts "determine_promotion_application_result failed"
+          end
           self.error = Spree.t(:coupon_code_not_found)
         end
       end

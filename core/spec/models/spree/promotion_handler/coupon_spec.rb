@@ -106,6 +106,15 @@ module Spree
               order.contents.add create(:variant)
             end
 
+            around do |example|
+              begin
+                $debug = true
+                example.run
+              ensure
+                $debug = false
+              end
+            end
+
             # regression spec for #4515
             it "successfully activates promo" do
               subject.apply
