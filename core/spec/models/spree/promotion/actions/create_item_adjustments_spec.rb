@@ -62,8 +62,12 @@ module Spree
                 expect(action.adjustments.count).to eql 1
                 puts "action.adjustments:"
                 puts action.adjustments.map(&:inspect)
-                expect(line_item.reload.adjustments).to match_array action.adjustments
-                expect(second_line_item.reload.adjustments).to be_empty
+                puts "line_item:"
+                p line_item.reload
+                puts "second_line_item:"
+                p second_line_item
+                expect(line_item.adjustments).to match_array action.adjustments
+                expect(second_line_item.adjustments).to be_empty
               end
             end
 
