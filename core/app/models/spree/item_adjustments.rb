@@ -64,6 +64,13 @@ module Spree
     # This promotion provides the most discount, and if two promotions
     # have the same amount, then it will pick the latest one.
     def choose_best_promotion_adjustment
+      if $debug2
+        puts
+        puts "adjustments.count: #{adjustments.count}"
+        puts "adjustments:"
+        puts adjustments.map { |a| [a.id, a.amount, a.created_at.to_f, a.created_at.usec, a.created_at.nsec, a.created_at, a.label] }.map(&:inspect)
+        puts
+      end
       if best_promotion_adjustment
         other_promotions = self.adjustments.promotion.where("id NOT IN (?)", best_promotion_adjustment.id)
         other_promotions.update_all(:eligible => false)
@@ -71,7 +78,15 @@ module Spree
     end
 
     def best_promotion_adjustment
-      @best_promotion_adjustment ||= adjustments.promotion.eligible.reorder("amount ASC, created_at DESC").first
+      @best_promotion_adjustment ||= begin
+        if $debug2
+          puts
+          puts "sorted adjustments:"
+          puts adjustments.promotion.eligible.reorder("amount ASC, created_at DESC").map(&:inspect)
+          puts
+        end
+        adjustments.promotion.eligible.reorder("amount ASC, created_at DESC").first
+      end
     end
   end
 end
