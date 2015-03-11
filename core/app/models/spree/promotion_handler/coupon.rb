@@ -81,6 +81,33 @@ module Spree
           p.source.promotion.codes.any? { |code| code.value == order.coupon_code.downcase }
         }
 
+        if $debug
+          puts
+          puts "order.line_items:"
+          puts order.line_items.map(&:inspect)
+          puts
+          puts "Spree::PromotionAction.all:"
+          puts Spree::PromotionAction.all.map(&:inspect)
+          puts
+          puts "order.coupon_code.downcase: #{order.coupon_code.downcase}"
+          puts
+          puts "Spree::PromotionCode.all:"
+          puts Spree::PromotionCode.all.map(&:inspect)
+          puts
+          puts "Spree::Promotion.all:"
+          puts Spree::Promotion.all.map(&:inspect)
+          puts
+          puts "order.line_item_adjustments:"
+          puts order.line_item_adjustments.map(&:inspect)
+          puts
+          puts "order.shipment_adjustments:"
+          puts order.shipment_adjustments.map(&:inspect)
+          puts
+          puts "order.adjustments:"
+          puts order.adjustments.map(&:inspect)
+          puts
+        end
+
         discount = order.line_item_adjustments.promotion.detect(&detector)
         discount ||= order.shipment_adjustments.promotion.detect(&detector)
         discount ||= order.adjustments.promotion.detect(&detector)

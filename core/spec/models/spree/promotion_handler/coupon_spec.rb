@@ -43,7 +43,7 @@ module Spree
       context "existing coupon code promotion" do
         let!(:promotion) { promotion_code.promotion }
         let(:promotion_code) { create(:promotion_code, value: '10off') }
-        let!(:action) { Promotion::Actions::CreateItemAdjustments.create(promotion: promotion, calculator: calculator) }
+        let!(:action) { Promotion::Actions::CreateItemAdjustments.create!(promotion: promotion, calculator: calculator) }
         let(:calculator) { Calculator::FlatRate.new(preferred_amount: 10) }
 
         it "fetches with given code" do
@@ -95,13 +95,13 @@ module Spree
           end
 
           context "coexists with a non coupon code promo" do
-            let!(:order) { Order.create }
+            let!(:order) { Order.create! }
 
             before do
               order.stub :coupon_code => "10off"
               calculator = Calculator::FlatRate.new(preferred_amount: 10)
               general_promo = create(:promotion, name: "General Promo")
-              general_action = Promotion::Actions::CreateItemAdjustments.create(promotion: general_promo, calculator: calculator)
+              general_action = Promotion::Actions::CreateItemAdjustments.create!(promotion: general_promo, calculator: calculator)
 
               order.contents.add create(:variant)
             end
