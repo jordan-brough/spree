@@ -23,7 +23,8 @@ class Spree::PromotionCode < ActiveRecord::Base
   #
   # @return [Integer] usage count
   def usage_count
-    adjustment_promotion_scope(Spree::Adjustment.eligible).count
+    adjustments = adjustment_promotion_scope(Spree::Adjustment.eligible)
+    usage_count_on_orders(adjustments) + usage_count_on_everything_else(adjustments)
   end
 
   def usage_limit
@@ -42,5 +43,20 @@ class Spree::PromotionCode < ActiveRecord::Base
 
   def adjustment_promotion_scope(adjustment_scope)
     adjustment_scope.promotion.where(source_id: promotion.actions.map(&:id), promotion_code_id: id)
+  end
+
+  def usage_count_on_orders(adjustments)
+    join_condition = <<-SQL.gsub(/^\s+\|/, '')
+      |INNER JOIN spree_orders
+      |  ON spree_orders.id = spree_adjustments.adjustable_id
+      |  AND spree_adjustments.adjustable_type = 'Spree::Order'
+    SQL
+
+    adjustments.joins(join_condition).
+      where(spree_orders: { state: "complete" }).size
+  end
+
+  def usage_count_on_everything_else(adjustments)
+    adjustments.where("adjustable_type <> 'Spree::Order'").size
   end
 end

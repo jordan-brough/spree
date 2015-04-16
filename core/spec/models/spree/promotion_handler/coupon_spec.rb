@@ -214,25 +214,6 @@ module Spree
                 expect(subject.error).to eq Spree.t(:coupon_code_max_usage)
               end
             end
-
-            context "when the promotion code exceeds its usage limit" do
-              let(:second_order) { create(:order, coupon_code: "10off", item_total: 50, ship_total: 10) }
-
-              before do
-                promotion.update!(per_code_usage_limit: 1)
-                Coupon.new(second_order).apply
-              end
-
-              it "is not successful" do
-                subject.apply
-                expect(subject.successful?).to be false
-              end
-
-              it "returns a coupon is at max usage error" do
-                subject.apply
-                expect(subject.error).to eq Spree.t(:coupon_code_max_usage)
-              end
-            end
           end
         end
 

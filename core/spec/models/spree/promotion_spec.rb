@@ -338,7 +338,7 @@ describe Spree::Promotion do
     end
 
     context "when the promotion code's usage limit is exceeded" do
-      let(:order) { create(:order) }
+      let(:order) { create(:completed_order_with_totals) }
       let(:promotion) { create(:promotion, :with_order_adjustment, code: 'abc123', per_code_usage_limit: 1) }
       let(:promotion_code) { promotion.codes.first }
 
