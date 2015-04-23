@@ -8,7 +8,8 @@ set_gemfile(){
   export BUNDLE_GEMFILE="`pwd`/Gemfile"
 }
 
-# Target postgres. Override with: `DB=sqlite bash build.sh`
+# Target postgres. Override with: `DB=sqlite bash build.sh` (or DB=mysql)
+# You can also supply DB_TEMPLATE for a fully custom database.yml.
 export DB=${DB:-postgres}
 
 # Spree defaults

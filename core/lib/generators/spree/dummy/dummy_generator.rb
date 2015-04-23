@@ -41,7 +41,11 @@ module Spree
       @lib_name = options[:lib_name]
       @database = options[:database]
 
-      template "rails/database.yml", "#{dummy_path}/config/database.yml", :force => true
+      if ENV['DB_TEMPLATE']
+        template ENV['DB_TEMPLATE'], "#{dummy_path}/config/database.yml", :force => true
+      else
+        template "rails/database.yml", "#{dummy_path}/config/database.yml", :force => true
+      end
       template "rails/boot.rb", "#{dummy_path}/config/boot.rb", :force => true
       template "rails/application.rb", "#{dummy_path}/config/application.rb", :force => true
       template "rails/routes.rb", "#{dummy_path}/config/routes.rb", :force => true
