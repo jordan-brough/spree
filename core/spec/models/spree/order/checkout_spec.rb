@@ -520,6 +520,7 @@ describe Spree::Order do
 
     it "does not attempt to process payments" do
       order.stub(:ensure_available_shipping_rates).and_return(true)
+      order.stub(:ensure_promotions_eligible).and_return(true)
       order.stub_chain(:line_items, :present?).and_return(true)
       order.stub_chain(:line_items, :map).and_return([])
       order.should_not_receive(:payment_required?)

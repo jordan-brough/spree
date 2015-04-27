@@ -30,8 +30,12 @@ module Spree
       update_hooks.each { |hook| order.send hook }
     end
 
-    def recalculate_adjustments
-      all_adjustments.includes(:adjustable).map(&:adjustable).uniq.each { |adjustable| Spree::ItemAdjustments.new(adjustable).update }
+    def recalculate_non_promotion_adjustments
+      recalculate_adjustments(all_adjustments.non_promotion)
+    end
+
+    def recalculate_promotion_adjustments
+      recalculate_adjustments(all_adjustments.promotion)
     end
 
     # Updates the following Order total values:
@@ -59,21 +63,27 @@ module Spree
       update_order_total
     end
 
+    def update_promo_total
+      recalculate_promotion_adjustments
+      order.promo_total = line_items.sum(:promo_total) +
+        shipments.sum(:promo_total) +
+        adjustments.promotion.eligible.sum(:amount)
+    end
+
     def update_order_total
       order.total = order.item_total + order.shipment_total + order.adjustment_total
     end
 
     def update_adjustment_total
-      recalculate_adjustments
+      recalculate_non_promotion_adjustments
+
+      update_promo_total
+
       order.adjustment_total = line_items.sum(:adjustment_total) +
                                shipments.sum(:adjustment_total)  +
                                adjustments.eligible.sum(:amount)
       order.included_tax_total = line_items.sum(:included_tax_total) + shipments.sum(:included_tax_total)
       order.additional_tax_total = line_items.sum(:additional_tax_total) + shipments.sum(:additional_tax_total)
-
-      order.promo_total = line_items.sum(:promo_total) +
-                          shipments.sum(:promo_total) +
-                          adjustments.promotion.eligible.sum(:amount)
 
       update_order_total
     end
@@ -183,8 +193,12 @@ module Spree
 
     private
 
-      def round_money(n)
-        (n * 100).round / 100.0
-      end
+    def round_money(n)
+      (n * 100).round / 100.0
+    end
+
+    def recalculate_adjustments(adjustments)
+      adjustments.includes(:adjustable).map(&:adjustable).uniq.each { |adjustable| Spree::ItemAdjustments.new(adjustable).update }
+    end
   end
 end
