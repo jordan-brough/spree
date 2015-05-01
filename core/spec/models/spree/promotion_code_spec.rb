@@ -172,6 +172,13 @@ RSpec.describe Spree::PromotionCode do
       expect{
         order.complete
       }.to change(order, :promo_total).from(-10).to(0)
+      # We should have failed
+      expect(order.state).to eq('confirm')
+      # We should succeed on retry.
+      # This fails for me.
+      expect {
+        order.complete
+      }.to change { order.state }.from('confirm').to('complete')
     end
   end
 end
