@@ -3,6 +3,7 @@ require 'spec_helper'
 describe Spree::InventoryUnit do
   let(:stock_location) { create(:stock_location_with_items) }
   let(:stock_item) { stock_location.stock_items.order(:id).first }
+  let(:line_item) { create(:line_item, variant: stock_item.variant) }
 
   context "#backordered_for_stock_item" do
     let(:order) do
@@ -27,6 +28,7 @@ describe Spree::InventoryUnit do
       unit.state = 'backordered'
       unit.variant_id = stock_item.variant.id
       unit.order_id = order.id
+      unit.line_item = line_item
       unit.tap(&:save!)
     end
 
@@ -43,7 +45,9 @@ describe Spree::InventoryUnit do
     it "does not find inventory units that aren't backordered" do
       on_hand_unit = shipment.inventory_units.build
       on_hand_unit.state = 'on_hand'
-      on_hand_unit.variant_id = 1
+      on_hand_unit.order_id = order.id
+      on_hand_unit.line_item = line_item
+      on_hand_unit.variant = stock_item.variant
       on_hand_unit.save!
 
       Spree::InventoryUnit.backordered_for_stock_item(stock_item).should_not include(on_hand_unit)
@@ -52,6 +56,8 @@ describe Spree::InventoryUnit do
     it "does not find inventory units that don't match the stock item's variant" do
       other_variant_unit = shipment.inventory_units.build
       other_variant_unit.state = 'backordered'
+      other_variant_unit.order_id = order.id
+      other_variant_unit.line_item = line_item
       other_variant_unit.variant = create(:variant)
       other_variant_unit.save!
 
@@ -81,6 +87,7 @@ describe Spree::InventoryUnit do
         unit.state = 'backordered'
         unit.variant_id = stock_item.variant.id
         unit.order_id = other_order.id
+        unit.line_item = line_item
         unit.tap(&:save!)
       end
 
@@ -93,9 +100,7 @@ describe Spree::InventoryUnit do
   end
 
   context "variants deleted" do
-    let!(:unit) do
-      Spree::InventoryUnit.create(variant: stock_item.variant)
-    end
+    let!(:unit) { create(:inventory_unit) }
 
     it "can still fetch variant" do
       unit.variant.destroy

@@ -13,8 +13,8 @@ module Spree
             order = Spree::Order.create!
             order.contents.associate_user(user)
 
-            create_shipments_from_params(params.delete(:shipments_attributes), order)
             create_line_items_from_params(params.delete(:line_items_attributes),order)
+            create_shipments_from_params(params.delete(:shipments_attributes), order)
             create_adjustments_from_params(params.delete(:adjustments_attributes), order)
             create_payments_from_params(params.delete(:payments_attributes), order)
 
@@ -50,6 +50,11 @@ module Spree
               unit = shipment.inventory_units.build
               unit.order = order
               unit.variant_id = iu[:variant_id]
+              if line_item = order.line_items.find_by(variant_id: iu[:variant_id])
+                unit.line_item = line_item
+              else
+                unit.line_item = order.contents.add(Spree::Variant.find(iu[:variant_id]), 1)
+              end
             end
 
             shipment.save!

@@ -3,6 +3,8 @@ require 'spree/order/checkout'
 
 module Spree
   class Order < ActiveRecord::Base
+    class InsufficientStock < StandardError; end
+
     include Checkout
     include CurrencyUpdater
 
@@ -559,7 +561,7 @@ module Spree
           inventory_validator = Spree::Stock::InventoryValidator.new
 
           errors = line_items.map { |line_item| inventory_validator.validate(line_item) }.compact
-          raise Spree::LineItem::InsufficientStock if errors.any?
+          raise InsufficientStock if errors.any?
         end
       end
 
@@ -567,7 +569,7 @@ module Spree
         availability_validator = Spree::Stock::AvailabilityValidator.new
 
         errors = line_items.map { |line_item| availability_validator.validate(line_item) }.compact
-        raise Spree::LineItem::InsufficientStock if errors.any?
+        raise InsufficientStock if errors.any?
       end
 
       def has_available_shipment
