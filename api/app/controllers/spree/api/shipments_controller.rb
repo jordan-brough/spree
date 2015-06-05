@@ -67,7 +67,6 @@ module Spree
         quantity = params[:quantity].to_i
 
         @shipment.order.contents.add(variant, quantity, nil, @shipment)
-
         respond_with(@shipment, default_template: :show)
       end
 
@@ -75,9 +74,14 @@ module Spree
         variant = Spree::Variant.find(params[:variant_id])
         quantity = params[:quantity].to_i
 
-        @shipment.order.contents.remove(variant, quantity, @shipment)
-        @shipment.reload if @shipment.persisted?
-        respond_with(@shipment, default_template: :show)
+        if @shipment.pending?
+          @shipment.order.contents.remove(variant, quantity, @shipment)
+          @shipment.reload if @shipment.persisted?
+          respond_with(@shipment, default_template: :show)
+        else
+          @shipment.errors.add(:base, :cannot_remove_items_shipment_state, state: @shipment.state)
+          invalid_resource!(@shipment)
+        end
       end
 
       def transfer_to_location

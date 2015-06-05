@@ -68,7 +68,7 @@ describe Spree::Api::ShipmentsController do
       response.status.should == 422
     end
 
-    context 'for completed shipments' do
+    context 'for completed orders' do
       let(:order) { create :completed_order_with_totals }
       let!(:resource_scoping) { { id: order.shipments.first.to_param, shipment: { order_id: order.to_param } } }
 
@@ -85,6 +85,24 @@ describe Spree::Api::ShipmentsController do
         response.status.should == 200
         json_response['manifest'].detect { |h| h['variant']['id'] == variant.id }["quantity"].should == 1
       end
+    end
+
+    context "for shipped shipments" do
+      let(:order) { create :shipped_order }
+      let!(:resource_scoping) { { id: order.shipments.first.to_param, shipment: { order_id: order.to_param } } }
+
+      it 'adds a variant to a shipment' do
+        api_put :add, { variant_id: variant.to_param, quantity: 2 }
+        response.status.should == 200
+        json_response['manifest'].detect { |h| h['variant']['id'] == variant.id }["quantity"].should == 2
+      end
+
+      it 'cannot remove a variant from a shipment' do
+        api_put :remove, { variant_id: variant.to_param, quantity: 1 }
+        response.status.should == 422
+        expect(json_response['errors']['base'].join).to match /Cannot remove items/
+      end
+
     end
 
     describe '#mine' do

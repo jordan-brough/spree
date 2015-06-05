@@ -2,6 +2,7 @@ FactoryGirl.define do
   factory :order, class: Spree::Order do
     user
     bill_address
+    ship_address
     completed_at nil
     email { user.email }
 
@@ -61,10 +62,22 @@ FactoryGirl.define do
             order.reload
           end
           factory :shipped_order do
-            after(:create) do |order|
+            transient do
+              with_cartons true
+            end
+            after(:create) do |order, evaluator|
               order.shipments.each do |shipment|
                 shipment.inventory_units.each { |u| u.update_column('state', 'shipped') }
                 shipment.update_columns(state: 'shipped', shipped_at: Time.now)
+                if evaluator.with_cartons
+                  Spree::Carton.create!(
+                    stock_location: shipment.stock_location,
+                    address: shipment.address,
+                    shipping_method: shipment.shipping_method,
+                    inventory_units: shipment.inventory_units,
+                    shipped_at: Time.now,
+                  )
+                end
               end
               order.reload
             end

@@ -32,7 +32,7 @@ describe "Customer Details" do
     it "associates a user when not using guest checkout" do
       click_link "Orders"
       click_link "New Order"
-      click_link "Customer Details" 
+      click_link "Customer Details"
       targetted_select2 "foobar@example.com", :from => "#s2id_customer_search"
       fill_in_address
       check "order_use_billing"
@@ -54,6 +54,7 @@ describe "Customer Details" do
         end
 
         click_button "Update"
+        click_link "Customer Details"
         find_field("order_bill_address_attributes_state_name").value.should == "Piaui"
       end
     end
@@ -104,6 +105,7 @@ describe "Customer Details" do
   end
 
   it "should show validation errors" do
+    order.update_attributes!(ship_address_id: nil)
     click_link "Customer Details"
     click_button "Update"
     page.should have_content("Shipping address first name can't be blank")

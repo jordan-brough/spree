@@ -15,7 +15,7 @@ describe Spree::ReturnAuthorization do
 
   context "save" do
     it "should be invalid when order has no inventory units" do
-      order.shipments.destroy_all
+      order.inventory_units.each(&:delete)
       return_authorization.save
       return_authorization.errors[:order].should == ["has no shipped units"]
     end
