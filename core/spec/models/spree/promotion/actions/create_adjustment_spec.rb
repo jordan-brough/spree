@@ -26,7 +26,7 @@ describe Spree::Promotion::Actions::CreateAdjustment do
       order.shipments.create!(:cost => 10)
 
       action.perform(payload)
-      promotion.usage_count.should == 1
+      promotion.usage_count.should == 0
       order.adjustments.count.should == 1
       order.adjustments.first.amount.to_i.should == -10
     end
@@ -42,7 +42,8 @@ describe Spree::Promotion::Actions::CreateAdjustment do
 
       action.perform(payload)
       action.perform(payload)
-      promotion.usage_count.should == 1
+      promotion.usage_count.should == 0
+      order.adjustments.count.should == 1
     end
 
     context "when a promotion code is used" do

@@ -565,6 +565,15 @@ module Spree
         end
       end
 
+      def ensure_promotions_eligible
+        updater.update_adjustment_total
+        if promo_total_changed?
+          restart_checkout_flow
+          errors.add(:base, Spree.t(:promotion_total_changed_before_complete))
+        end
+        errors.empty?
+      end
+
       def validate_line_item_availability
         availability_validator = Spree::Stock::AvailabilityValidator.new
         raise InsufficientStock unless line_items.all? { |line_item| availability_validator.validate(line_item) }

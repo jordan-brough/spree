@@ -77,6 +77,7 @@ module Spree
               before_transition to: :complete, do: :validate_line_item_availability, unless: :unreturned_exchange?
               before_transition to: :complete, do: :ensure_inventory_units, unless: :unreturned_exchange?
               before_transition to: :complete, do: :ensure_available_shipping_rates
+              before_transition to: :complete, do: :ensure_promotions_eligible
 
               if states[:payment]
                 event :payment_failed do
