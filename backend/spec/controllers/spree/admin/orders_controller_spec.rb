@@ -204,7 +204,7 @@ describe Spree::Admin::OrdersController do
 
       context 'insufficient stock to complete the order' do
         before do
-          order.should_receive(:complete!).and_raise Spree::LineItem::InsufficientStock
+          order.should_receive(:complete!).and_raise Spree::Order::InsufficientStock
         end
 
         it 'messages and redirects' do
