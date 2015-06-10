@@ -140,7 +140,7 @@ describe Spree::Refund do
         payment.payment_method
           .should_receive(:credit)
           .with(amount_in_cents, payment.source, payment.transaction_id, {originator: an_instance_of(Spree::Refund)})
-          .and_raise(ActiveMerchant::ConnectionError)
+          .and_raise(ActiveMerchant::ConnectionError.new("foo", nil))
       end
 
       it 'raises Spree::Core::GatewayError' do
