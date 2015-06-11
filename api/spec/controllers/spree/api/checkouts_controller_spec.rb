@@ -49,25 +49,6 @@ module Spree
         response.status.should == 422
         json_response['error'].should =~ /could not be transitioned/
       end
-
-      context 'insufficient stock' do
-        before do
-          expect_any_instance_of(Spree::Order).to receive(:next!).and_raise(Spree::Order::InsufficientStock)
-        end
-
-        subject { api_put :next, :id => order.to_param, :order_token => order.token }
-
-        it "should return a 422" do
-          expect(subject.status).to eq(422)
-        end
-
-        it "returns an error message" do
-          subject
-          expect(JSON.parse(response.body)).to eq(
-            {"errors" => ["Quantity is not available for items in your order"], "type" => "insufficient_stock"}
-          )
-        end
-      end
     end
 
     context "PUT 'complete'" do

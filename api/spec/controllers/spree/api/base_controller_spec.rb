@@ -3,6 +3,8 @@ require 'spec_helper'
 describe Spree::Api::BaseController do
   render_views
   controller(Spree::Api::BaseController) do
+    rescue_from Spree::Order::InsufficientStock, with: :insufficient_stock_error
+
     def index
       render :text => { "products" => [] }.to_json
     end
@@ -62,6 +64,24 @@ describe Spree::Api::BaseController do
     subject.should_receive(:index).and_raise(Exception.new("no joy"))
     get :index, :token => "fake_key"
     json_response.should == { "exception" => "no joy" }
+  end
+
+  context 'insufficient stock' do
+    before do
+      subject.should_receive(:authenticate_user).and_return(true)
+      subject.should_receive(:index).and_raise(Spree::Order::InsufficientStock)
+      get :index, :token => "fake_key"
+    end
+
+    it "should return a 422" do
+      expect(response.status).to eq(422)
+    end
+
+    it "returns an error message" do
+      expect(json_response).to eq(
+        {"errors" => ["Quantity is not available for items in your order"], "type" => "insufficient_stock"}
+      )
+    end
   end
 
   context 'lock_order' do
