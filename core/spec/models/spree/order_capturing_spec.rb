@@ -111,6 +111,22 @@ describe Spree::OrderCapturing do
           expect(order.payments.to_a.sum(&:uncaptured_amount)).to eq 1.0
         end
       end
+
+      context "when the order has been modified between initialization and capturing" do
+        let!(:original_order_total) { order.total }
+        let(:bogus_total) { original_order_total }
+        let(:secondary_payment_method) { SecondaryBogusPaymentMethod }
+        let(:payment_methods) { [Spree::Gateway::Bogus, SecondaryBogusPaymentMethod] }
+
+        it "captures the up-to-date totals" do
+          order_capturing = Spree::OrderCapturing.new(order, payment_methods)
+          Spree::OrderCancellations.new(Spree::Order.find_by(id: order.id)).short_ship([order.inventory_units.first])
+          order_capturing.capture_payments
+          expect(order.reload.payment_state).to eq 'paid'
+          expect(@bogus_payment.reload.capture_events.sum(:amount)).to_not eq(original_order_total)
+          expect(@bogus_payment.capture_events.sum(:amount)).to eq(order.total)
+        end
+      end
     end
   end
 end

@@ -19,7 +19,7 @@ class Spree::OrderCapturing
     return if @order.paid?
 
     Spree::OrderMutex.with_lock!(@order) do
-      uncaptured_amount = @order.display_total.cents
+      uncaptured_amount = @order.reload.display_total.cents
 
       begin
         sorted_payments(@order).each do |payment|
