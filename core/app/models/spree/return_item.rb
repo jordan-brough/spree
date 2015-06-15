@@ -178,15 +178,6 @@ module Spree
       self.update_attributes(acceptance_status_errors: validator.errors)
     end
 
-    def stock_item
-      return unless customer_return
-
-      Spree::StockItem.find_by({
-        variant_id: inventory_unit.variant_id,
-        stock_location_id: customer_return.stock_location_id,
-      })
-    end
-
     def currency
       return_authorization.try(:currency) || Spree::Config[:currency]
     end
@@ -194,8 +185,10 @@ module Spree
     def process_inventory_unit!
       inventory_unit.return!
 
-      Spree::StockMovement.create!(stock_item_id: stock_item.id, quantity: 1) if should_restock?
-      customer_return.process_return! if customer_return
+      if customer_return
+        customer_return.stock_location.restock(inventory_unit.variant, 1, customer_return) if should_restock?
+        customer_return.process_return!
+      end
     end
 
     def sibling_intended_for_exchange(status)
@@ -273,8 +266,8 @@ module Spree
     def should_restock?
       resellable? &&
         variant.should_track_inventory? &&
-        stock_item &&
-        stock_item.stock_location.restock_inventory?
+        customer_return &&
+        customer_return.stock_location.restock_inventory?
     end
   end
 end
