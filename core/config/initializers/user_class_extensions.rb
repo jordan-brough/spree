@@ -21,7 +21,7 @@ Spree::Core::Engine.config.to_prepare do
       end
 
       def last_incomplete_spree_order
-        spree_orders.incomplete.where(:created_by_id => self.id).order('created_at DESC').first
+        spree_orders.incomplete.where(:created_by_id => self.id).where(frontend_viewable: true).order('created_at DESC').first
       end
     end
   end

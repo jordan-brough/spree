@@ -112,6 +112,14 @@ module Spree
         end
       end
 
+      context "an incomplete order that is not frontend viewable exist" do
+        before { order.update_attributes!(frontend_viewable: false) }
+        it "returns no orders" do
+          expect(subject.body).to be_blank
+          expect(subject.status).to eq 204
+        end
+      end
+
       context "multiple incomplete orders exist" do
         it "returns the latest incomplete order" do
           new_order = Spree::Order.create! user: order.user

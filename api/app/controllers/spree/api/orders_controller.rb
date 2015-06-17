@@ -127,7 +127,7 @@ module Spree
         def find_current_api_user_orders
           last_completed_at = current_api_user.orders.complete.order(:completed_at).select(:completed_at).last.try(:completed_at)
 
-          incomplete_orders = current_api_user.orders.incomplete.order(:created_at)
+          incomplete_orders = current_api_user.orders.incomplete.where(frontend_viewable: true).order(:created_at)
           incomplete_orders = incomplete_orders.where('created_at > ?', last_completed_at) if last_completed_at
 
           incomplete_orders

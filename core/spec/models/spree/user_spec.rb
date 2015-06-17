@@ -9,6 +9,7 @@ describe Spree::LegacyUser do
     let!(:order_1) { create(:order, :created_at => 1.day.ago, :user => user, :created_by => user) }
     let!(:order_2) { create(:order, :user => user, :created_by => user) }
     let!(:order_3) { create(:order, :user => user, :created_by => create(:user)) }
+    let!(:order_4) { create(:order, :user => user, :created_by => user, frontend_viewable: false) }
 
     it "returns correct order" do
       user.last_incomplete_spree_order.should == order_2
