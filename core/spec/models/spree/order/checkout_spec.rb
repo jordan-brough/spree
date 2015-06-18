@@ -264,22 +264,40 @@ describe Spree::Order do
     end
 
     context "to payment" do
-      before do
-        @default_credit_card = FactoryGirl.create(:credit_card)
-        order.user = mock_model(Spree::LegacyUser, default_credit_card: @default_credit_card, email: 'spree@example.org')
+      let(:user_bill_address)   { nil }
+      let(:order_bill_address)  { nil }
+      let(:default_credit_card) { create(:credit_card) }
 
+      before do
+        order.user = mock_model(Spree::LegacyUser, default_credit_card: default_credit_card, email: 'spree@example.org', bill_address: user_bill_address)
         order.stub(payment_required?: true)
         order.state = 'delivery'
+        order.bill_address = order_bill_address
         order.save!
+        order.next!
+        order.reload
       end
 
       it "assigns the user's default credit card" do
-        order.next!
-        order.reload
-
         expect(order.state).to eq 'payment'
         expect(order.payments.count).to eq 1
-        expect(order.payments.first.source).to eq @default_credit_card
+        expect(order.payments.first.source).to eq default_credit_card
+      end
+
+      context "order already has a billing address" do
+        let(:order_bill_address) { create(:address) }
+
+        it "keeps the order's billing address" do
+          expect(order.bill_address).to eq order_bill_address
+        end
+      end
+
+      context "order doesn't have a billing address" do
+        let(:user_bill_address) { create(:address) }
+
+        it "assigns the user's billing address to the order" do
+          expect(order.bill_address).to eq user_bill_address
+        end
       end
     end
 
