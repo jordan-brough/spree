@@ -123,16 +123,66 @@ describe Spree::Payment do
     end
 
     describe "#process!" do
-      it "should purchase if with auto_capture" do
-        payment.payment_method.should_receive(:auto_capture?).and_return(true)
-        payment.should_receive(:purchase!)
-        payment.process!
+      context 'with autocapture' do
+        before do
+          payment.payment_method.should_receive(:auto_capture?).and_return(true)
+        end
+
+        it "should purchase" do
+          payment.should_receive(:purchase!)
+          payment.process!
+        end
       end
 
-      it "should authorize without auto_capture" do
-        payment.payment_method.should_receive(:auto_capture?).and_return(false)
-        payment.should_receive(:authorize!)
-        payment.process!
+      context 'without autocapture' do
+        before do
+          allow(payment.payment_method).to receive(:auto_capture?).and_return(false)
+        end
+
+        context 'when in the checkout state' do
+          before do
+            payment.update_attributes!(state: 'checkout')
+          end
+
+          it "authorizes" do
+            expect(payment).to receive(:authorize!)
+            payment.process!
+          end
+        end
+
+        context 'when in the processing state' do
+          before do
+            payment.update_attributes!(state: 'processing')
+          end
+
+          it "does not authorize" do
+            expect(payment).to_not receive(:authorize!)
+            payment.process!
+          end
+        end
+
+        context 'when in the pending state' do
+          before do
+            payment.update_attributes!(state: 'pending')
+          end
+
+          it "does not authorize" do
+            expect(payment).to_not receive(:authorize!)
+            payment.process!
+          end
+        end
+
+        context 'when in any other state' do
+          before do
+            payment.update_attributes!(state: 'failed')
+          end
+
+          it "raises an error" do
+            expect {
+              payment.process!
+            }.to raise_error(Spree::Core::GatewayError, Spree.t(:payemnt_cannot_authorize_from, state: 'failed'))
+          end
+        end
       end
 
       it "should make the state 'processing'" do

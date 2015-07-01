@@ -9,7 +9,13 @@ module Spree
                 if payment_method.auto_capture?
                   purchase!
                 else
-                  authorize!
+                  if checkout?
+                    authorize!
+                  elsif pending?
+                    # do nothing. already authorized
+                  else
+                    raise Core::GatewayError.new(Spree.t(:payemnt_cannot_authorize_from, state: state))
+                  end
                 end
               else
                 invalidate!

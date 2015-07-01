@@ -1032,6 +1032,7 @@ en:
     path: Path
     pay: pay
     payment: Payment
+    payemnt_cannot_authorize_from: A payment cannot be authorized while in the %{state} state.
     payment_could_not_be_created: Payment could not be created.
     payment_identifier: Payment Identifier
     payment_information: Payment Information
