@@ -9,7 +9,11 @@ module Spree
                 if payment_method.auto_capture?
                   purchase!
                 else
-                  authorize!
+                  if pending?
+                    # do nothing. already authorized.
+                  else
+                    authorize!
+                  end
                 end
               else
                 invalidate!

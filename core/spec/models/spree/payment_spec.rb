@@ -5,7 +5,7 @@ describe Spree::Payment do
   let(:refund_reason) { create(:refund_reason) }
 
   let(:gateway) do
-    gateway = Spree::Gateway::Bogus.new(:environment => 'test', :active => true)
+    gateway = Spree::Gateway::Bogus.new(:environment => 'test', :active => true, :name => 'Bogus gateway')
     gateway.stub :source_required => true
     gateway
   end
@@ -123,29 +123,81 @@ describe Spree::Payment do
     end
 
     describe "#process!" do
-      it "should purchase if with auto_capture" do
-        payment.payment_method.should_receive(:auto_capture?).and_return(true)
-        payment.should_receive(:purchase!)
-        payment.process!
+      context 'with autocapture' do
+        before do
+          payment.payment_method.update_attributes!(auto_capture: true)
+        end
+
+        it "should purchase" do
+          payment.process!
+          expect(payment).to be_completed
+        end
       end
 
-      it "should authorize without auto_capture" do
-        payment.payment_method.should_receive(:auto_capture?).and_return(false)
-        payment.should_receive(:authorize!)
-        payment.process!
+      context 'without autocapture' do
+        before do
+          payment.payment_method.update_attributes!(auto_capture: false)
+        end
+
+        context 'when in the checkout state' do
+          before { payment.update_attributes!(state: 'checkout') }
+
+          it "authorizes" do
+            payment.process!
+            expect(payment).to be_pending
+          end
+        end
+
+        context 'when in the processing state' do
+          before { payment.update_attributes!(state: 'processing') }
+
+          it "does not authorize" do
+            payment.process!
+            expect(payment).to be_processing
+          end
+        end
+
+        context 'when in the pending state' do
+          before { payment.update_attributes!(state: 'pending') }
+
+          it "does not re-authorize" do
+            expect(payment).to_not receive(:authorize!)
+            payment.process!
+            expect(payment).to be_pending
+          end
+        end
+
+        context 'when in a failed state' do
+          before { payment.update_attributes!(state: 'failed') }
+
+          it "raises an exception" do
+            expect {
+              payment.process!
+            }.to raise_error(StateMachine::InvalidTransition, /Cannot transition/)
+          end
+        end
+
+        context 'when in the completed state' do
+          before { payment.update_attributes!(state: 'completed') }
+
+          it "authorizes" do
+            payment.process!
+            # TODO: Is this really what we want to happen in this case?
+            expect(payment).to be_pending
+          end
+        end
       end
 
       it "should make the state 'processing'" do
-        payment.should_receive(:started_processing!)
+        expect(payment).to receive(:started_processing!)
         payment.process!
       end
 
       it "should invalidate if payment method doesnt support source" do
-        payment.payment_method.should_receive(:supports?).with(payment.source).and_return(false)
+        expect(payment.payment_method).to receive(:supports?).with(payment.source).and_return(false)
         expect { payment.process!}.to raise_error(Spree::Core::GatewayError)
-        payment.state.should eq('invalid')
+        expect(payment.state).to eq('invalid')
       end
-
     end
 
     describe "#authorize!" do
