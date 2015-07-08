@@ -9,6 +9,8 @@ module Spree
 
       skip_before_filter :load_resource, :only => [:toggle_state, :edit, :update, :destroy]
 
+      helper_method :reasons_for
+
       def index
         @adjustments = @order.all_adjustments.order("created_at ASC")
       end
@@ -47,6 +49,13 @@ module Spree
       # associate adjustment with order
       def build_resource
         parent.adjustments.build(order: parent)
+      end
+
+      def reasons_for(adjustment)
+        [
+          AdjustmentReason.active.to_a,
+          @adjustment.adjustment_reason,
+        ].flatten.compact.uniq.sort_by { |r| r.name.downcase }
       end
     end
   end
