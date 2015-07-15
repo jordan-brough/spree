@@ -956,4 +956,23 @@ describe Spree::Order do
       expect(subject).not_to include order
     end
   end
+
+  describe 'credit card address syncing' do
+    let!(:order) { create(:order, bill_address: old_address) }
+    let!(:payment) { create(:payment, order: order, source: credit_card) }
+    let!(:credit_card) { create(:credit_card, address: old_address) }
+
+    let(:old_address) { create(:address) }
+    let(:new_address) { create(:address) }
+
+    context 'when the order bill address changes' do
+      it 'updates the credit card address' do
+        expect {
+          order.update_attributes!(bill_address: new_address)
+        }.to change {
+          credit_card.reload.address
+        }.from(old_address).to(new_address)
+      end
+    end
+  end
 end

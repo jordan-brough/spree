@@ -1,0 +1,80 @@
+namespace 'spree:migrations:copy_order_bill_address_to_credit_card' do
+  # This copies the billing address from the order associated with a
+  # credit card's most recent payment to the credit card.
+
+  # Used in the migration CopyOrderBillAddressToCreditCard and made available as a
+  # rake task to allow running it a second time after deploying the new code, in
+  # case some order->credit card data was missed between the time that the
+  # migration was run and the application servers were restarted with the new
+  # code.
+
+  # This task should be safe to run multiple times.
+
+  task up: :environment do
+    puts "Copying order bill addresses to credit cards"
+
+    if Spree::CreditCard.connection.adapter_name =~ /postgres/i
+      postgres_copy
+    else
+      ruby_copy
+    end
+  end
+
+  task down: :environment do
+    Spree::CreditCard.update_all(address_id: nil)
+  end
+
+  def ruby_copy
+    Spree::CreditCard.where(address_id: nil).includes(payments: :order).find_each(batch_size: 500) do |cc|
+      # Sorting done in Ruby to leverage the payments eager load
+      if payment = cc.payments.sort_by(&:created_at).last
+        order = payment.order
+        if order.bill_address_id.nil?
+          puts "Order without bill address (#{order.id})"
+          next
+        end
+
+        cc.update_column(:address_id, order.bill_address_id)
+        puts "Successfully associated billing address (#{order.bill_address_id}) with credit card (#{cc.id})"
+      end
+    end
+  end
+
+  # This was 30x faster for us but the syntax is postgres-specific. I'm sure
+  # there are equivalent versions for other DBs if someone wants to write them.
+  # I took a quick stab at crafting a cross-db compatible version but it was
+  # slow.
+  def postgres_copy
+    batch_size = 10_000
+
+    last_id = Spree::CreditCard.last.try!(:id) || 0
+    puts "last id: #{last_id}"
+
+    current_start_id = 1
+
+    while current_start_id <= last_id
+      current_end_id = current_start_id + batch_size
+      puts "updating #{current_start_id} to #{current_end_id}"
+
+      Spree::CreditCard.connection.execute(<<-SQL)
+        update spree_credit_cards c
+        set address_id = o.bill_address_id
+        from spree_payments p
+        left join spree_payments p_null
+          on  p_null.source_id = p.source_id
+          and p_null.source_type = 'Spree::CreditCard'
+          and p_null.created_at > p.created_at
+        inner join spree_orders o
+          on  o.id = p.order_id
+        where c.address_id is null
+          and p.source_id = c.id
+          and p.source_type = 'Spree::CreditCard'
+          and p_null.id is null
+          and o.bill_address_id is not null
+          and c.id between #{current_start_id} and #{current_end_id}
+      SQL
+
+      current_start_id += batch_size
+    end
+  end
+end

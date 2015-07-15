@@ -2,6 +2,7 @@ module Spree
   class CreditCard < ActiveRecord::Base
     belongs_to :payment_method
     belongs_to :user, class_name: Spree.user_class, foreign_key: 'user_id'
+    belongs_to :address, inverse_of: :credit_cards
     has_many :payments, as: :source
 
     before_save :set_last_digits

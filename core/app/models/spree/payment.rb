@@ -17,6 +17,7 @@ module Spree
     before_validation :validate_source, unless: :invalid?
     before_create :set_unique_identifier
 
+    after_create :sync_credit_card_address
     after_save :create_payment_profile, if: :profiles_supported?
 
     # update the order totals, etc.
@@ -217,6 +218,20 @@ module Spree
 
       def generate_identifier
         Array.new(8){ IDENTIFIER_CHARS.sample }.join
+      end
+
+      # Whenever a credit card is newly linked to an order (i.e. via a new
+      # payment) we update the credit card's address to match the order bill
+      # address.  If the order bill address changes later then we propagate
+      # that change via an after_save hook on Order.
+      def sync_credit_card_address
+        if source.is_a?(Spree::CreditCard) && order.bill_address
+          credit_card = source
+          credit_card.address = order.bill_address
+          if credit_card.persisted?
+            credit_card.save!
+          end
+        end
       end
   end
 end

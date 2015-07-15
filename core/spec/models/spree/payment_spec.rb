@@ -875,4 +875,32 @@ describe Spree::Payment do
       end
     end
   end
+
+  describe 'credit card address syncing' do
+    context 'when the order has an address' do
+      let(:credit_card) { create(:credit_card, address: old_address) }
+      let(:old_address) { create(:address) }
+      let(:order) { create(:order, bill_address: new_address) }
+      let(:new_address) { create(:address) }
+
+      it 'updates the credit card address' do
+        expect {
+          create(:payment, order: order, source: credit_card)
+        }.to change {
+          credit_card.address
+        }.from(old_address).to(new_address)
+      end
+    end
+
+    context 'when the order does not have a bill address' do
+      let(:credit_card) { create(:credit_card, address: old_address) }
+      let(:old_address) { create(:address) }
+      let(:order) { create(:order, bill_address: nil) }
+
+      it 'leaves the old credit card address in place' do
+        create(:payment, order: order, source: credit_card)
+        expect(credit_card.reload.address).to eq old_address
+      end
+    end
+  end
 end

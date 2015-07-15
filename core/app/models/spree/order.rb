@@ -89,6 +89,8 @@ module Spree
     before_create :link_by_email
     before_update :homogenize_line_item_currencies, if: :currency_changed?
 
+    after_save :sync_credit_card_addresses, if: :bill_address_id_changed?
+
     validates :email, presence: true, if: :require_email
     validates :email, email: true, if: :require_email, allow_blank: true
     validate :has_available_shipment
@@ -616,6 +618,14 @@ module Spree
 
       def set_currency
         self.currency = Spree::Config[:currency] if self[:currency].nil?
+      end
+
+      def sync_credit_card_addresses
+        if bill_address
+          credit_cards.each do |c|
+            c.update_attributes!(address: bill_address)
+          end
+        end
       end
 
   end
