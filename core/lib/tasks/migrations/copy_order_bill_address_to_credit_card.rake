@@ -47,12 +47,11 @@ namespace 'spree:migrations:copy_order_bill_address_to_credit_card' do
   def postgres_copy
     batch_size = 10_000
 
-    last_id = Spree::CreditCard.last.try!(:id) || 0
-    puts "last id: #{last_id}"
+    puts "last id: #{last_credit_card_id}"
 
     current_start_id = 1
 
-    while current_start_id <= last_id
+    while current_start_id <= last_credit_card_id
       current_end_id = current_start_id + batch_size
       puts "updating #{current_start_id} to #{current_end_id}"
 
@@ -76,5 +75,9 @@ namespace 'spree:migrations:copy_order_bill_address_to_credit_card' do
 
       current_start_id += batch_size
     end
+  end
+
+  def last_credit_card_id
+    Spree::CreditCard.last.try!(:id) || 0
   end
 end
